@@ -15,42 +15,42 @@ type AssortmentAPI struct {
 
 // AssortmentContainer ...
 type AssortmentContainer struct {
-	Created string `xml:"skapad-tid"`
+	Created string `xml:"skapad-tid" json:"created"`
 	Info    struct {
-		Message string `xml:"meddelande"`
-	} `xml:"info"`
+		Message string `xml:"meddelande" json:"message"`
+	} `xml:"info" json:"info"`
 	Items []struct {
-		ID         string `xml:"nr"`
-		ItemID     string `xml:"Artikelid"`
-		ItemNumber string `xml:"Varnummer"`
-		Name       string `xml:"Namn"`
-		Name2      string `xml:"Namn2"`
+		ID         string `xml:"nr" json:"id"`
+		ItemID     string `xml:"Artikelid" json:"itemId"`
+		ItemNumber string `xml:"Varnummer" json:"itemNumber"`
+		Name       string `xml:"Namn" json:"name"`
+		Name2      string `xml:"Namn2" json:"name2"`
 		// Including VAT:
-		Price float32 `xml:"Prisinklmoms"`
+		Price float32 `xml:"Prisinklmoms" json:"price"`
 		// In millilitres
-		Volume                float32 `xml:"Volymiml"`
-		PricePerLiter         float32 `xml:"PrisPerLiter"`
-		SalesStart            string  `xml:"Saljstart"`
-		Discontinued          bool    `xml:"Utgått"`
-		Group                 string  `xml:"Varugrupp"`
-		Type                  string  `xml:"Typ"`
-		Style                 string  `xml:"Stil"`
-		Packaging             string  `xml:"Forpackning"`
-		Seal                  string  `xml:"Forslutning"`
-		Origin                string  `xml:"Ursprung"`
-		CountryOfOrigin       string  `xml:"Ursprunglandnamn"`
-		Producer              string  `xml:"Producent"`
-		Supplier              string  `xml:"Leverantor"`
-		Vintage               string  `xml:"Argang"`
-		TestedVintage         string  `xml:"Provadargang"`
-		AlcholByVolume        string  `xml:"Alkoholhalt"`
-		Assortment            string  `xml:"Sortiment"`
-		AssortmentText        string  `xml:"SortimentText"`
-		Organic               bool    `xml:"Ekologisk"`
-		Ethical               bool    `xml:"Etisk"`
-		Kosher                bool    `xml:"Koscher"`
-		IngredientDescription string  `xml:"RavarorBeskrivning"`
-	} `xml:"artikel"`
+		Volume                float32 `xml:"Volymiml" json:"volume"`
+		PricePerLiter         float32 `xml:"PrisPerLiter" json:"pricePerLiter"`
+		SalesStart            string  `xml:"Saljstart" json:"salesStart"`
+		Discontinued          bool    `xml:"Utgått" json:"discontinued"`
+		Group                 string  `xml:"Varugrupp" json:"group"`
+		Type                  string  `xml:"Typ" json:"type"`
+		Style                 string  `xml:"Stil" json:"style"`
+		Packaging             string  `xml:"Forpackning" json:"packaging"`
+		Seal                  string  `xml:"Forslutning" json:"seal"`
+		Origin                string  `xml:"Ursprung" json:"origin"`
+		CountryOfOrigin       string  `xml:"Ursprunglandnamn" json:"countryOfOrigin"`
+		Producer              string  `xml:"Producent" json:"producer"`
+		Supplier              string  `xml:"Leverantor" json:"supplier"`
+		Vintage               string  `xml:"Argang" json:"vintage"`
+		TestedVintage         string  `xml:"Provadargang" json:"testedVintage"`
+		AlcholByVolume        string  `xml:"Alkoholhalt" json:"alcoholByVolume"`
+		Assortment            string  `xml:"Sortiment" json:"assortment"`
+		AssortmentText        string  `xml:"SortimentText" json:"assortmentText"`
+		Organic               bool    `xml:"Ekologisk" json:"organic"`
+		Ethical               bool    `xml:"Etisk" json:"ethical"`
+		Kosher                bool    `xml:"Koscher" json:"kosher"`
+		IngredientDescription string  `xml:"RavarorBeskrivning" json:"ingridentDescription"`
+	} `xml:"artikel" json:"items"`
 }
 
 // Debug ...

@@ -16,25 +16,25 @@ type StoresAPI struct {
 // StoresContainer ...
 type StoresContainer struct {
 	Info struct {
-		Message string `xml:"Meddelande"`
-	}
+		Message string `xml:"Meddelande" json:"message"`
+	} `json:"info"`
 	Stores []struct {
-		Type         string `xml:"Typ"`
-		ID           string `xml:"Nr"`
-		Name         string `xml:"Namn"`
-		Address1     string
-		Address2     string
-		Address3     string
-		Address4     string
-		Address5     string
-		PhoneNumber  string `xml:"Telefon"`
-		StoreType    string `xml:"ButiksTyp"`
-		Services     string `xml:"Tjanster"`
-		Keywords     string `xml:"SokOrd"`
-		OpeningHours string `xml:"Oppettider"`
-		RT90x        string
-		RT90y        string
-	} `xml:"ButikOmbud"`
+		Type         string `xml:"Typ" json:"type"`
+		ID           string `xml:"Nr" json:"id"`
+		Name         string `xml:"Namn" json:"name"`
+		Address1     string `json:"address1"`
+		Address2     string `json:"address2"`
+		Address3     string `json:"address3"`
+		Address4     string `json:"address4"`
+		Address5     string `json:"address5"`
+		PhoneNumber  string `xml:"Telefon" json:"phoneNumber"`
+		StoreType    string `xml:"ButiksTyp" json:"storeType"`
+		Services     string `xml:"Tjanster" json:"services"`
+		Keywords     string `xml:"SokOrd" json:"keywords"`
+		OpeningHours string `xml:"Oppettider" json:"openingHours"`
+		RT90x        string `json:"rt90x"`
+		RT90y        string `json:"rt90y"`
+	} `xml:"ButikOmbud" json:"stores"`
 }
 
 // Debug ...

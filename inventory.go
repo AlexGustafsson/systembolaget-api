@@ -23,12 +23,12 @@ type InventoryAPI struct {
 // InventoryContainer ...
 type InventoryContainer struct {
 	Info struct {
-		Message string `xml:"Meddelande"`
-	}
+		Message string `xml:"Meddelande" json:"message"`
+	} `json:"info"`
 	Stores []struct {
-		ID          string `xml:"ButikNr,attr"`
-		ItemNumbers []int  `xml:"ArtikelNr"`
-	} `xml:"Butik"`
+		ID          string `xml:"ButikNr,attr" json:"id"`
+		ItemNumbers []int  `xml:"ArtikelNr" json:"itemNumbers"`
+	} `xml:"Butik" json:"stores"`
 }
 
 // Debug ...
