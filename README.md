@@ -1,39 +1,55 @@
-systembolaget-api-fetch  - a cross-platform solution for fetching and converting [Systembolaget's open APIs](https://www.systembolaget.se/api/) to JSON
+systembolaget-api  - a cross-platform solution for fetching and converting [Systembolaget's open APIs](https://www.systembolaget.se/api/) to JSON
 ======
 
-The utility is an easy to use way of fetching Systembolaget's open APIs and converting them to JSON. It's written in Go and is available via several cross-platform builds.
+The utility is an easy to use way of fetching Systembolaget's open APIs and converting them to JSON and XML. It's written in Go and is available via several cross-platform builds.
+
+It's usable both as a library in Go and as a standalone utility for which you can find release builds [here](https://github.com/AlexGustafsson/systembolaget-api-fetch/releases/).
 
 # Quickstart
 <a name="quickstart"></a>
 
-#### Using systembolaget-api-fetch
+## Using as a utility
 
 Start by grabbing the latest release for your platform from the releases.
 
-```
-# run systembolaget-api-fetch
-> ./systembolaget-api-fetch
-Downloading https://www.systembolaget.se/api/assortment/stores/xml
-...
-Successfully processed stores API
-Downloading https://www.systembolaget.se/api/assortment/products/xml
-...
-Successfully processed assortment API
-Downloading https://www.systembolaget.se/api/assortment/stock/xml
-...
-Successfully processed inventory API
+Download the assortment and print it as an XML to STDOUT.
 
-# use generated data stored in ./output/
-> tree output
-output
-├── json
-│   ├── assortment.json
-│   ├── inventory.json
-│   └── stores.json
-└── xml
-    ├── assortment.xml
-    ├── inventory.xml
-    └── stores.xml
+```shell
+./systembolaget download assortment
+```
+
+Download the assortment and save it as JSON to a file.
+
+```shell
+./systembolaget download assortment --format=json --output=assortment.json
+```
+
+## Using as a library
+
+Add the necessary import.
+
+```go
+import (
+	"github.com/alexgustafsson/systembolaget-api/systembolaget"
+)
+```
+
+Download assortment.
+
+```go
+response, err := systembolaget.DownloadAssortment()
+```
+
+Convert to XML.
+
+```go
+xml, err := response.ConvertToXML()
+```
+
+Convert to JSON.
+
+```go
+json, err := response.ConvertToJSON()
 ```
 
 # Table of contents
@@ -56,6 +72,6 @@ Any help with the project is more than welcome. This is my first take on Go and 
 # Disclaimer
 <a name="disclaimer"></a>
 
-_Although the project is very capable, it is not built with production in mind. Therefore there might be complications when trying to use systembolaget-api-fetch for large-scale projects meant for the public. The utility was created to easily integrate Systembolaget's open APIs on several platforms and as such it might not promote best practices nor be performant._
+_Although the project is very capable, it is not built with production in mind. Therefore there might be complications when trying to use systembolaget-api for large-scale projects meant for the public. The utility was created to easily integrate Systembolaget's open APIs on several platforms and as such it might not promote best practices nor be performant._
 
 _The author nor the utility is in any way affiliated with Systembolaget._
