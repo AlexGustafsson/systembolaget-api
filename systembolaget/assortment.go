@@ -1,20 +1,13 @@
-package main
+package systembolaget
 
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
-	"io/ioutil"
+	"github.com/alexgustafsson/systembolaget-api/utils"
 )
 
-// AssortmentAPI ...
-type AssortmentAPI struct {
-	Container AssortmentContainer
-	Bytes     []byte
-}
-
-// AssortmentContainer ...
-type AssortmentContainer struct {
+// Assortment ...
+type Assortment struct {
 	Created string `xml:"skapad-tid" json:"created"`
 	Info    struct {
 		Message string `xml:"meddelande" json:"message"`
@@ -53,55 +46,74 @@ type AssortmentContainer struct {
 	} `xml:"artikel" json:"items"`
 }
 
-// Debug ...
-func (assortmentAPI *AssortmentAPI) Debug() {
-	fmt.Printf("There is a message: %s\n", assortmentAPI.Container.Info.Message)
-
-	fmt.Printf("There are %d Assortment\n", len(assortmentAPI.Container.Items))
+// Workaround for ignoring the struct tags in the field
+// when marshalling to XML
+type strippedAssortment struct {
+	Created string
+	Info    struct {
+		Message string
+	}
+	Items []struct {
+		ID         string
+		ItemID     string
+		ItemNumber string
+		Name       string
+		Name2      string
+		// Including VAT:
+		Price float32
+		// In millilitres
+		Volume                float32
+		PricePerLiter         float32
+		SalesStart            string
+		Discontinued          bool
+		Group                 string
+		Type                  string
+		Style                 string
+		Packaging             string
+		Seal                  string
+		Origin                string
+		CountryOfOrigin       string
+		Producer              string
+		Supplier              string
+		Vintage               string
+		TestedVintage         string
+		AlcholByVolume        string
+		Assortment            string
+		AssortmentText        string
+		Organic               bool
+		Ethical               bool
+		Kosher                bool
+		IngredientDescription string
+	}
 }
 
-// Download ...
-func (assortmentAPI *AssortmentAPI) Download() error {
-	bytes, err := download("https://www.systembolaget.se/api/assortment/products/xml")
-
-	assortmentAPI.Bytes = bytes
-
-	xml.Unmarshal(bytes, &assortmentAPI.Container)
-
-	return err
-}
-
-// Cache ...
-func (assortmentAPI *AssortmentAPI) Cache() error {
-	err := ioutil.WriteFile("output/xml/assortment.xml", assortmentAPI.Bytes, 0644)
-
-	return err
-}
-
-// Convert ...
-func (assortmentAPI *AssortmentAPI) Convert() error {
-	bytes, _ := json.Marshal(assortmentAPI.Container)
-	err := ioutil.WriteFile("output/json/assortment.json", bytes, 0644)
-
-	return err
-}
-
-// Process ...
-func (assortmentAPI *AssortmentAPI) Process() error {
-	err := assortmentAPI.Download()
-
+// DownloadAssortment downloads the data and unmarshals the original XML format.
+func DownloadAssortment() (*Assortment, error) {
+	// Download
+	bytes, err := utils.Download("https://www.systembolaget.se/api/assortment/products/xml")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	assortmentAPI.Debug()
-	err = assortmentAPI.Cache()
-
+	// Unmarshal
+	var response = &Assortment{}
+	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = assortmentAPI.Convert()
+	return response, nil
+}
 
-	return err
+// ConvertToJSON ...
+func (response *Assortment) ConvertToJSON() ([]byte, error) {
+	return json.Marshal(response)
+}
+
+// ConvertToXML ...
+func (response *Assortment) ConvertToXML() ([]byte, error) {
+	// Workaround for ignoring the struct tags in the field
+	// when marshalling to XML
+	strippedResponse := strippedAssortment(*response)
+	return xml.Marshal(strippedResponse)
 }
