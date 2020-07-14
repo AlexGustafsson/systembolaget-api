@@ -3,7 +3,7 @@ MAKEFLAGS += --silent
 
 # Add build-time variables
 PREFIX := $(shell go list ./version)
-VERSION := 0.1.0
+VERSION := 1.0.0
 COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null)
 GO_VERSION := $(shell go version)
 COMPILE_TIME := $(shell LC_ALL=en_US date)
