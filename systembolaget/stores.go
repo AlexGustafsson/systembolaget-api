@@ -74,14 +74,22 @@ func DownloadStores() (*Stores, error) {
 }
 
 // ConvertToJSON ...
-func (response *Stores) ConvertToJSON() ([]byte, error) {
+func (response *Stores) ConvertToJSON(pretty bool) ([]byte, error) {
+	if pretty {
+		return json.MarshalIndent(response, "", "  ")
+	}
+
 	return json.Marshal(response)
 }
 
 // ConvertToXML ...
-func (response *Stores) ConvertToXML() ([]byte, error) {
+func (response *Stores) ConvertToXML(pretty bool) ([]byte, error) {
 	// Workaround for ignoring the struct tags in the field
 	// when marshalling to XML
 	strippedResponse := strippedStores(*response)
+	if pretty {
+		return xml.MarshalIndent(strippedResponse, "", "  ")
+	}
+
 	return xml.Marshal(strippedResponse)
 }

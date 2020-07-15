@@ -14,6 +14,11 @@ var downloadFlags = []cli.Flag{
 		Usage: "Output format. Eiter JSON or XML",
 		Value: "JSON",
 	},
+	&cli.BoolFlag{
+		Name:  "pretty",
+		Usage: "Pretty print output",
+		Value: false,
+	},
 }
 
 // Commands contains all commands of the application

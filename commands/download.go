@@ -18,7 +18,7 @@ func downloadAssortmentCommand(context *cli.Context) error {
 	format := strings.ToLower(context.String("format"))
 	output := context.String("output")
 	if format == "xml" {
-		xml, err := response.ConvertToXML()
+		xml, err := response.ConvertToXML(context.Bool("pretty"))
 		if err != nil {
 			return err
 		}
@@ -31,7 +31,7 @@ func downloadAssortmentCommand(context *cli.Context) error {
 			ioutil.WriteFile(output, xml, 0644)
 		}
 	} else if format == "json" {
-		json, err := response.ConvertToJSON()
+		json, err := response.ConvertToJSON(context.Bool("pretty"))
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ func downloadInventoryCommand(context *cli.Context) error {
 	format := strings.ToLower(context.String("format"))
 	output := context.String("output")
 	if format == "xml" {
-		xml, err := response.ConvertToXML()
+		xml, err := response.ConvertToXML(context.Bool("pretty"))
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ func downloadInventoryCommand(context *cli.Context) error {
 			ioutil.WriteFile(output, xml, 0644)
 		}
 	} else if format == "json" {
-		json, err := response.ConvertToJSON()
+		json, err := response.ConvertToJSON(context.Bool("pretty"))
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func downloadStoresCommand(context *cli.Context) error {
 	format := strings.ToLower(context.String("format"))
 	output := context.String("output")
 	if format == "xml" {
-		xml, err := response.ConvertToXML()
+		xml, err := response.ConvertToXML(context.Bool("pretty"))
 		if err != nil {
 			return err
 		}
@@ -105,7 +105,7 @@ func downloadStoresCommand(context *cli.Context) error {
 			ioutil.WriteFile(output, xml, 0644)
 		}
 	} else if format == "json" {
-		json, err := response.ConvertToJSON()
+		json, err := response.ConvertToJSON(context.Bool("pretty"))
 		if err != nil {
 			return err
 		}

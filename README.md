@@ -18,10 +18,10 @@ Download the assortment and print it as an XML to STDOUT.
 ./systembolaget download assortment
 ```
 
-Download the assortment and save it as JSON to a file.
+Download the assortment and save it as prettified JSON to a file.
 
 ```shell
-./systembolaget download assortment --format=json --output=assortment.json
+./systembolaget download assortment --format=json --pretty --output=assortment.json
 ```
 
 ## Using as a library
@@ -40,16 +40,16 @@ Download assortment.
 response, err := systembolaget.DownloadAssortment()
 ```
 
-Convert to XML.
+Convert to prettified XML.
 
 ```go
-xml, err := response.ConvertToXML()
+xml, err := response.ConvertToXML(true)
 ```
 
-Convert to JSON.
+Convert to minimal JSON.
 
 ```go
-json, err := response.ConvertToJSON()
+json, err := response.ConvertToJSON(false)
 ```
 
 # Table of contents
