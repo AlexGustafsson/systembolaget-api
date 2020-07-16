@@ -7,115 +7,115 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"fmt"
 )
 
 func downloadAssortmentCommand(context *cli.Context) error {
+	format := strings.ToLower(context.String("format"))
+	output := context.String("output")
+	pretty := context.Bool("pretty")
+
+	log.Debug("Attempting to download assortment")
 	response, err := systembolaget.DownloadAssortment()
 	if err != nil {
 		return err
 	}
 
-	format := strings.ToLower(context.String("format"))
-	output := context.String("output")
+	log.Debug("Downloaded data, converting to output format")
+	var outputBytes []byte
 	if format == "xml" {
-		xml, err := response.ConvertToXML(context.Bool("pretty"))
-		if err != nil {
-			return err
-		}
-
-		log.Debug("Successfully processed assortment API")
-
-		if output == "" {
-			os.Stdout.Write(xml)
-		} else {
-			ioutil.WriteFile(output, xml, 0644)
-		}
+		outputBytes, err = response.ConvertToXML(pretty)
 	} else if format == "json" {
-		json, err := response.ConvertToJSON(context.Bool("pretty"))
-		if err != nil {
-			return err
-		}
+		outputBytes, err = response.ConvertToJSON(pretty)
+	} else {
+		return fmt.Errorf("Unsupported output format: %s", format)
+	}
+	if err != nil {
+		return err
+	}
 
-		log.Debug("Successfully processed assortment API")
-		if output == "" {
-			os.Stdout.Write(json)
-		} else {
-			ioutil.WriteFile(output, json, 0644)
-		}
+	log.Debug("Converted data, writing to target")
+	if output == "" {
+		os.Stdout.Write(outputBytes)
+	} else {
+		err = ioutil.WriteFile(output, outputBytes, 0644)
+	}
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func downloadInventoryCommand(context *cli.Context) error {
+	format := strings.ToLower(context.String("format"))
+	output := context.String("output")
+	pretty := context.Bool("pretty")
+
+	log.Debug("Attempting to download inventory")
 	response, err := systembolaget.DownloadInventory()
 	if err != nil {
 		return err
 	}
 
-	format := strings.ToLower(context.String("format"))
-	output := context.String("output")
+	log.Debug("Downloaded data, converting to output format")
+	var outputBytes []byte
 	if format == "xml" {
-		xml, err := response.ConvertToXML(context.Bool("pretty"))
-		if err != nil {
-			return err
-		}
-
-		log.Debug("Successfully processed assortment API")
-		if output == "" {
-			os.Stdout.Write(xml)
-		} else {
-			ioutil.WriteFile(output, xml, 0644)
-		}
+		outputBytes, err = response.ConvertToXML(pretty)
 	} else if format == "json" {
-		json, err := response.ConvertToJSON(context.Bool("pretty"))
-		if err != nil {
-			return err
-		}
+		outputBytes, err = response.ConvertToJSON(pretty)
+	} else {
+		return fmt.Errorf("Unsupported output format: %s", format)
+	}
+	if err != nil {
+		return err
+	}
 
-		log.Debug("Successfully processed assortment API")
-		if output == "" {
-			os.Stdout.Write(json)
-		} else {
-			ioutil.WriteFile(output, json, 0644)
-		}
+	log.Debug("Converted data, writing to target")
+	if output == "" {
+		os.Stdout.Write(outputBytes)
+	} else {
+		err = ioutil.WriteFile(output, outputBytes, 0644)
+	}
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func downloadStoresCommand(context *cli.Context) error {
+	format := strings.ToLower(context.String("format"))
+	output := context.String("output")
+	pretty := context.Bool("pretty")
+
+	log.Debug("Attempting to download stores")
 	response, err := systembolaget.DownloadStores()
 	if err != nil {
 		return err
 	}
 
-	format := strings.ToLower(context.String("format"))
-	output := context.String("output")
+	log.Debug("Downloaded data, converting to output format")
+	var outputBytes []byte
 	if format == "xml" {
-		xml, err := response.ConvertToXML(context.Bool("pretty"))
-		if err != nil {
-			return err
-		}
-
-		log.Debug("Successfully processed assortment API")
-		if output == "" {
-			os.Stdout.Write(xml)
-		} else {
-			ioutil.WriteFile(output, xml, 0644)
-		}
+		outputBytes, err = response.ConvertToXML(pretty)
 	} else if format == "json" {
-		json, err := response.ConvertToJSON(context.Bool("pretty"))
-		if err != nil {
-			return err
-		}
+		outputBytes, err = response.ConvertToJSON(pretty)
+	} else {
+		return fmt.Errorf("Unsupported output format: %s", format)
+	}
+	if err != nil {
+		return err
+	}
 
-		log.Debug("Successfully processed assortment API")
-		if output == "" {
-			os.Stdout.Write(json)
-		} else {
-			ioutil.WriteFile(output, json, 0644)
-		}
+	log.Debug("Converted data, writing to target")
+	if output == "" {
+		os.Stdout.Write(outputBytes)
+	} else {
+		err = ioutil.WriteFile(output, outputBytes, 0644)
+	}
+	if err != nil {
+		return err
 	}
 
 	return nil
