@@ -79,7 +79,7 @@ var Commands = []*cli.Command{
 		},
 	},
 	{
-		Name: "convert",
+		Name:  "convert",
 		Usage: "Convert API data from one format to another",
 		Subcommands: []*cli.Command{
 			{

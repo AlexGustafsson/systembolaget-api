@@ -1,13 +1,13 @@
 package commands
 
 import (
+	"fmt"
 	"github.com/alexgustafsson/systembolaget-api/systembolaget"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"io/ioutil"
 	"os"
 	"strings"
-	"fmt"
 )
 
 func downloadAssortmentCommand(context *cli.Context) error {
