@@ -11,7 +11,33 @@ var downloadFlags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "format, f",
-		Usage: "Output format. Eiter JSON or XML",
+		Usage: "Output format. Either JSON or XML",
+		Value: "JSON",
+	},
+	&cli.BoolFlag{
+		Name:  "pretty",
+		Usage: "Pretty print output",
+		Value: false,
+	},
+}
+
+var convertFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "input, i",
+		Usage: "Input file",
+	},
+	&cli.StringFlag{
+		Name:  "output, o",
+		Usage: "Output file",
+	},
+	&cli.StringFlag{
+		Name:  "input-format",
+		Usage: "Input format. Either JSON or XML",
+		Value: "JSON",
+	},
+	&cli.StringFlag{
+		Name:  "output-format",
+		Usage: "Output format. Either JSON or XML",
 		Value: "JSON",
 	},
 	&cli.BoolFlag{
@@ -49,6 +75,30 @@ var Commands = []*cli.Command{
 				Usage:  "Download stores data",
 				Action: downloadStoresCommand,
 				Flags:  downloadFlags,
+			},
+		},
+	},
+	{
+		Name: "convert",
+		Usage: "Convert API data from one format to another",
+		Subcommands: []*cli.Command{
+			{
+				Name:   "assortment",
+				Usage:  "Convert assortment data",
+				Action: convertAssortmentCommand,
+				Flags:  convertFlags,
+			},
+			{
+				Name:   "inventory",
+				Usage:  "Convert inventory data",
+				Action: convertInventoryCommand,
+				Flags:  convertFlags,
+			},
+			{
+				Name:   "stores",
+				Usage:  "Convert stores data",
+				Action: convertStoresCommand,
+				Flags:  convertFlags,
 			},
 		},
 	},

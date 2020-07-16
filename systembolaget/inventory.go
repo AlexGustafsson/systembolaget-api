@@ -7,38 +7,38 @@ import (
 	"sort"
 )
 
+// StoreInput ...
+type StoreInput struct {
+	ID          string `xml:"ButikNr,attr"`
+	ItemNumbers []int  `xml:"ArtikelNr"`
+}
+
+// InventoryInput ...
+type InventoryInput struct {
+	Info struct {
+		Message string `xml:"Meddelande"`
+	} `json:"info"`
+	Stores []struct {
+		ID          string `xml:"ButikNr,attr"`
+		ItemNumbers []int  `xml:"ArtikelNr"`
+	} `xml:"Butik"`
+}
+
 // Store ...
 type Store struct {
-	ID          string `xml:"ButikNr,attr" json:"id"`
-	ItemNumbers []int  `xml:"ArtikelNr" json:"itemNumbers"`
+	ID          string `json:"id"`
+	ItemNumbers []int  `json:"itemNumbers"`
 }
 
 // Inventory ...
 type Inventory struct {
 	Info struct {
-		Message string `xml:"Meddelande" json:"message"`
+		Message string `json:"message"`
 	} `json:"info"`
 	Stores []struct {
-		ID          string `xml:"ButikNr,attr" json:"id"`
-		ItemNumbers []int  `xml:"ArtikelNr" json:"itemNumbers"`
-	} `xml:"Butik" json:"stores"`
-}
-
-// Workaround for ignoring the struct tags in the field
-// when marshalling to XML
-type strippedStore struct {
-	ID          string `xml:"ButikNr,attr" json:"id"`
-	ItemNumbers []int  `xml:"ArtikelNr" json:"itemNumbers"`
-}
-
-type strippedInventory struct {
-	Info struct {
-		Message string
-	}
-	Stores []struct {
-		ID          string
-		ItemNumbers []int
-	}
+		ID          string `json:"id"`
+		ItemNumbers []int  `json:"itemNumbers"`
+	} `json:"stores"`
 }
 
 type byID []struct {
@@ -59,8 +59,8 @@ func DownloadInventory() (*Inventory, error) {
 	}
 
 	// Unmarshal
-	var response = &Inventory{}
-	err = xml.Unmarshal(bytes, &response)
+	var response = &InventoryInput{}
+	err = xml.Unmarshal(bytes, response)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,22 @@ func DownloadInventory() (*Inventory, error) {
 		sort.Ints(store.ItemNumbers)
 	}
 
-	return response, nil
+	var convertedResponse = Inventory(*response)
+	return &convertedResponse, nil
+}
+
+// ParseInventoryFromXML ...
+func ParseInventoryFromXML(bytes []byte) (*Inventory, error) {
+	var response = &Inventory{}
+	err := xml.Unmarshal(bytes, &response)
+	return response, err
+}
+
+// ParseInventoryFromJSON ...
+func ParseInventoryFromJSON(bytes []byte) (*Inventory, error) {
+	var response = &Inventory{}
+	err := json.Unmarshal(bytes, &response)
+	return response, err
 }
 
 // ConvertToJSON ...
@@ -85,12 +100,9 @@ func (response *Inventory) ConvertToJSON(pretty bool) ([]byte, error) {
 
 // ConvertToXML ...
 func (response *Inventory) ConvertToXML(pretty bool) ([]byte, error) {
-	// Workaround for ignoring the struct tags in the field
-	// when marshalling to XML
-	strippedResponse := strippedInventory(*response)
 	if pretty {
-		return xml.MarshalIndent(strippedResponse, "", "  ")
+		return xml.MarshalIndent(response, "", "  ")
 	}
 
-	return xml.Marshal(strippedResponse)
+	return xml.Marshal(response)
 }

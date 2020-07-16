@@ -6,53 +6,52 @@ import (
 	"github.com/alexgustafsson/systembolaget-api/utils"
 )
 
-// Stores ...
-type Stores struct {
+// StoresInput ...
+type StoresInput struct {
 	Info struct {
-		Message string `xml:"Meddelande" json:"message"`
+		Message string `xml:"Meddelande"`
 	} `json:"info"`
 	Stores []struct {
-		Type         string `xml:"Typ" json:"type"`
-		ID           string `xml:"Nr" json:"id"`
-		Name         string `xml:"Namn" json:"name"`
+		Type         string `xml:"Typ"`
+		ID           string `xml:"Nr"`
+		Name         string `xml:"Namn"`
 		Address1     string `json:"address1"`
 		Address2     string `json:"address2"`
 		Address3     string `json:"address3"`
 		Address4     string `json:"address4"`
 		Address5     string `json:"address5"`
-		PhoneNumber  string `xml:"Telefon" json:"phoneNumber"`
-		StoreType    string `xml:"ButiksTyp" json:"storeType"`
-		Services     string `xml:"Tjanster" json:"services"`
-		Keywords     string `xml:"SokOrd" json:"keywords"`
-		OpeningHours string `xml:"Oppettider" json:"openingHours"`
+		PhoneNumber  string `xml:"Telefon"`
+		StoreType    string `xml:"ButiksTyp"`
+		Services     string `xml:"Tjanster"`
+		Keywords     string `xml:"SokOrd"`
+		OpeningHours string `xml:"Oppettider"`
 		RT90x        string `json:"rt90x"`
 		RT90y        string `json:"rt90y"`
-	} `xml:"ButikOmbud" json:"stores"`
+	} `xml:"ButikOmbud"`
 }
 
-// Workaround for ignoring the struct tags in the field
-// when marshalling to XML
-type strippedStores struct {
+// Stores ...
+type Stores struct {
 	Info struct {
-		Message string
-	}
+		Message string `json:"message"`
+	} `json:"info"`
 	Stores []struct {
-		Type         string
-		ID           string
-		Name         string
-		Address1     string
-		Address2     string
-		Address3     string
-		Address4     string
-		Address5     string
-		PhoneNumber  string
-		StoreType    string
-		Services     string
-		Keywords     string
-		OpeningHours string
-		RT90x        string
-		RT90y        string
-	}
+		Type         string `json:"type"`
+		ID           string `json:"id"`
+		Name         string `json:"name"`
+		Address1     string `json:"address1"`
+		Address2     string `json:"address2"`
+		Address3     string `json:"address3"`
+		Address4     string `json:"address4"`
+		Address5     string `json:"address5"`
+		PhoneNumber  string `json:"phoneNumber"`
+		StoreType    string `json:"storeType"`
+		Services     string `json:"services"`
+		Keywords     string `json:"keywords"`
+		OpeningHours string `json:"openingHours"`
+		RT90x        string `json:"rt90x"`
+		RT90y        string `json:"rt90y"`
+	} `json:"stores"`
 }
 
 // DownloadStores ...
@@ -64,13 +63,28 @@ func DownloadStores() (*Stores, error) {
 	}
 
 	// Unmarshal
-	var response = &Stores{}
+	var response = &StoresInput{}
 	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	var convertedResponse = Stores(*response)
+	return &convertedResponse, nil
+}
+
+// ParseStoreFromXML ...
+func ParseStoreFromXML(bytes []byte) (*Stores, error) {
+	var response = &Stores{}
+	err := xml.Unmarshal(bytes, &response)
+	return response, err
+}
+
+// ParseStoreFromJSON ...
+func ParseStoreFromJSON(bytes []byte) (*Stores, error) {
+	var response = &Stores{}
+	err := json.Unmarshal(bytes, &response)
+	return response, err
 }
 
 // ConvertToJSON ...
@@ -84,12 +98,9 @@ func (response *Stores) ConvertToJSON(pretty bool) ([]byte, error) {
 
 // ConvertToXML ...
 func (response *Stores) ConvertToXML(pretty bool) ([]byte, error) {
-	// Workaround for ignoring the struct tags in the field
-	// when marshalling to XML
-	strippedResponse := strippedStores(*response)
 	if pretty {
-		return xml.MarshalIndent(strippedResponse, "", "  ")
+		return xml.MarshalIndent(response, "", "  ")
 	}
 
-	return xml.Marshal(strippedResponse)
+	return xml.Marshal(response)
 }
