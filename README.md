@@ -24,6 +24,12 @@ Download the assortment and save it as prettified JSON to a file.
 ./systembolaget download assortment --format=json --pretty --output=assortment.json
 ```
 
+Convert the assortment back to XML.
+
+```shell
+./systembolaget convert assortment --input assortment.json --input-format=json --output=assortment.xml --output-format=xml
+```
+
 ## Using as a library
 
 Add the necessary import.
@@ -50,6 +56,12 @@ Convert to minimal JSON.
 
 ```go
 json, err := response.ConvertToJSON(false)
+```
+
+Load from JSON
+
+```go
+assortment, err := systembolaget.ParseAssortmentFromJSON(fileBytes)
 ```
 
 # Table of contents
