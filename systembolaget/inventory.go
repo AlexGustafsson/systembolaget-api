@@ -27,7 +27,7 @@ type InventoryInput struct {
 // Store ...
 type Store struct {
 	ID          string `json:"id"`
-	ItemNumbers []int  `json:"itemNumbers"`
+	ItemNumbers []int  `xml:"ItemNumber" json:"itemNumbers"`
 }
 
 // Inventory ...
@@ -37,8 +37,8 @@ type Inventory struct {
 	} `json:"info"`
 	Stores []struct {
 		ID          string `json:"id"`
-		ItemNumbers []int  `json:"itemNumbers"`
-	} `json:"stores"`
+		ItemNumbers []int  `xml:"ItemNumber" json:"itemNumbers"`
+	} `xml:"Store" json:"stores"`
 }
 
 type byID []struct {
