@@ -82,7 +82,7 @@ type Assortment struct {
 		Organic               bool    `json:"organic"`
 		Ethical               bool    `json:"ethical"`
 		Kosher                bool    `json:"kosher"`
-		IngredientDescription string  `json:"ingridentDescription"`
+		IngredientDescription string  `json:"ingredientDescription"`
 	} `json:"items"`
 }
 
