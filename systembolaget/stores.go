@@ -15,18 +15,18 @@ type StoresInput struct {
 		Type         string `xml:"Typ"`
 		ID           string `xml:"Nr"`
 		Name         string `xml:"Namn"`
-		Address1     string `json:"address1"`
-		Address2     string `json:"address2"`
-		Address3     string `json:"address3"`
-		Address4     string `json:"address4"`
-		Address5     string `json:"address5"`
+		Address1     string
+		Address2     string
+		Address3     string
+		Address4     string
+		Address5     string
 		PhoneNumber  string `xml:"Telefon"`
 		StoreType    string `xml:"ButiksTyp"`
 		Services     string `xml:"Tjanster"`
 		Keywords     string `xml:"SokOrd"`
 		OpeningHours string `xml:"Oppettider"`
-		RT90x        string `json:"rt90x"`
-		RT90y        string `json:"rt90y"`
+		RT90x        string
+		RT90y        string
 	} `xml:"ButikOmbud"`
 }
 
@@ -51,7 +51,7 @@ type Stores struct {
 		OpeningHours string `json:"openingHours"`
 		RT90x        string `json:"rt90x"`
 		RT90y        string `json:"rt90y"`
-	} `json:"stores"`
+	} `xml:"Store" json:"stores"`
 }
 
 // DownloadStores ...

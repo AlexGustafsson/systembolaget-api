@@ -17,7 +17,7 @@ type StoreInput struct {
 type InventoryInput struct {
 	Info struct {
 		Message string `xml:"Meddelande"`
-	} `json:"info"`
+	}
 	Stores []struct {
 		ID          string `xml:"ButikNr,attr"`
 		ItemNumbers []int  `xml:"ArtikelNr"`
