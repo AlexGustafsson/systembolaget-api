@@ -17,7 +17,7 @@ func convertAssortmentCommand(context *cli.Context) error {
 	output := context.String("output")
 	pretty := context.Bool("pretty")
 
-	log.Debug("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
+	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
 
 	bytes, err := ioutil.ReadFile(input)
 	if err != nil {
@@ -67,7 +67,7 @@ func convertInventoryCommand(context *cli.Context) error {
 	output := context.String("output")
 	pretty := context.Bool("pretty")
 
-	log.Debug("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
+	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
 
 	bytes, err := ioutil.ReadFile(input)
 	if err != nil {
@@ -117,7 +117,7 @@ func convertStoresCommand(context *cli.Context) error {
 	output := context.String("output")
 	pretty := context.Bool("pretty")
 
-	log.Debug("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
+	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
 
 	bytes, err := ioutil.ReadFile(input)
 	if err != nil {
