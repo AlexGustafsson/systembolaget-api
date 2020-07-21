@@ -6,52 +6,28 @@ import (
 	"github.com/alexgustafsson/systembolaget-api/utils"
 )
 
-// StoresInput ...
-type StoresInput struct {
-	Info struct {
-		Message string `xml:"Meddelande"`
-	} `json:"info"`
-	Stores []struct {
-		Type         string `xml:"Typ"`
-		ID           string `xml:"Nr"`
-		Name         string `xml:"Namn"`
-		Address1     string
-		Address2     string
-		Address3     string
-		Address4     string
-		Address5     string
-		PhoneNumber  string `xml:"Telefon"`
-		StoreType    string `xml:"ButiksTyp"`
-		Services     string `xml:"Tjanster"`
-		Keywords     string `xml:"SokOrd"`
-		OpeningHours string `xml:"Oppettider"`
-		RT90x        string
-		RT90y        string
-	} `xml:"ButikOmbud"`
-}
-
 // Stores ...
 type Stores struct {
 	Info struct {
-		Message string `json:"message"`
+		Message string `systembolagetXML:"Meddelande" json:"message"`
 	} `json:"info"`
 	Stores []struct {
-		Type         string `json:"type"`
-		ID           string `json:"id"`
-		Name         string `json:"name"`
-		Address1     string `json:"address1"`
-		Address2     string `json:"address2"`
-		Address3     string `json:"address3"`
-		Address4     string `json:"address4"`
-		Address5     string `json:"address5"`
-		PhoneNumber  string `json:"phoneNumber"`
-		StoreType    string `json:"storeType"`
-		Services     string `json:"services"`
-		Keywords     string `json:"keywords"`
-		OpeningHours string `json:"openingHours"`
+		Type         string `systembolagetXML:"Typ" json:"type"`
+		ID           string `systembolagetXML:"Nr" json:"id"`
+		Name         string `systembolagetXML:"Namn" json:"name"`
+		Address1     string `json:address1`
+		Address2     string `json:address2`
+		Address3     string `json:address3`
+		Address4     string `json:address4`
+		Address5     string `json:address5`
+		PhoneNumber  string `systembolagetXML:"Telefon" json:"phoneNumber"`
+		StoreType    string `systembolagetXML:"ButiksTyp" json:"storeType"`
+		Services     string `systembolagetXML:"Tjanster" json:"services"`
+		Keywords     string `systembolagetXML:"SokOrd" json:"keywords"`
+		OpeningHours string `systembolagetXML:"Oppettider" json:"openingHours"`
 		RT90x        string `json:"rt90x"`
 		RT90y        string `json:"rt90y"`
-	} `xml:"Store" json:"stores"`
+	} `systembolagetXML:"ButikOmbud" xml:"Store" json:"stores"`
 }
 
 // DownloadStores ...
@@ -64,7 +40,7 @@ func DownloadStores() (*Stores, error) {
 
 	// Unmarshal
 	var response = &StoresInput{}
-	err = xml.Unmarshal(bytes, &response)
+	err = util.UnmarshalXML(bytes, &response)
 	if err != nil {
 		return nil, err
 	}
