@@ -8,16 +8,17 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"path/filepath"
 )
 
 func convertAssortmentCommand(context *cli.Context) error {
-	inputFormat := strings.ToLower(context.String("input-format"))
-	outputFormat := strings.ToLower(context.String("output-format"))
 	input := context.String("input")
 	output := context.String("output")
 	pretty := context.Bool("pretty")
+	inputExtension := strings.ToLower(filepath.Ext(input))
+	outputExtension := strings.ToLower(filepath.Ext(output))
 
-	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
+	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputExtension, output, outputExtension)
 
 	bytes, err := ioutil.ReadFile(input)
 	if err != nil {
@@ -25,24 +26,24 @@ func convertAssortmentCommand(context *cli.Context) error {
 	}
 
 	var assortment *systembolaget.Assortment
-	if inputFormat == "xml" {
+	if inputExtension == ".xml" {
 		assortment, err = systembolaget.ParseAssortmentFromXML(bytes)
-	} else if inputFormat == "json" {
+	} else if inputExtension == ".json" {
 		assortment, err = systembolaget.ParseAssortmentFromJSON(bytes)
 	} else {
-		return fmt.Errorf("Unsupported input format: %s", inputFormat)
+		return fmt.Errorf("Unsupported input format: %s", inputExtension)
 	}
 	if err != nil {
 		return err
 	}
 
 	var outputBytes []byte
-	if outputFormat == "xml" {
+	if outputExtension == ".xml" {
 		outputBytes, err = assortment.ConvertToXML(pretty)
-	} else if outputFormat == "json" {
+	} else if outputExtension == ".json" {
 		outputBytes, err = assortment.ConvertToJSON(pretty)
 	} else {
-		return fmt.Errorf("Unsupported output format: %s", outputFormat)
+		return fmt.Errorf("Unsupported output format: %s", outputExtension)
 	}
 	if err != nil {
 		return err
@@ -61,13 +62,13 @@ func convertAssortmentCommand(context *cli.Context) error {
 }
 
 func convertInventoryCommand(context *cli.Context) error {
-	inputFormat := strings.ToLower(context.String("input-format"))
-	outputFormat := strings.ToLower(context.String("output-format"))
 	input := context.String("input")
 	output := context.String("output")
 	pretty := context.Bool("pretty")
+	inputExtension := strings.ToLower(filepath.Ext(input))
+	outputExtension := strings.ToLower(filepath.Ext(output))
 
-	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
+	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputExtension, output, outputExtension)
 
 	bytes, err := ioutil.ReadFile(input)
 	if err != nil {
@@ -75,24 +76,24 @@ func convertInventoryCommand(context *cli.Context) error {
 	}
 
 	var inventory *systembolaget.Inventory
-	if inputFormat == "xml" {
+	if inputExtension == ".xml" {
 		inventory, err = systembolaget.ParseInventoryFromXML(bytes)
-	} else if inputFormat == "json" {
+	} else if inputExtension == ".json" {
 		inventory, err = systembolaget.ParseInventoryFromJSON(bytes)
 	} else {
-		return fmt.Errorf("Unsupported input format: %s", inputFormat)
+		return fmt.Errorf("Unsupported input format: %s", inputExtension)
 	}
 	if err != nil {
 		return err
 	}
 
 	var outputBytes []byte
-	if outputFormat == "xml" {
+	if outputExtension == ".xml" {
 		outputBytes, err = inventory.ConvertToXML(pretty)
-	} else if outputFormat == "json" {
+	} else if outputExtension == ".json" {
 		outputBytes, err = inventory.ConvertToJSON(pretty)
 	} else {
-		return fmt.Errorf("Unsupported output format: %s", outputFormat)
+		return fmt.Errorf("Unsupported output format: %s", outputExtension)
 	}
 	if err != nil {
 		return err
@@ -111,13 +112,13 @@ func convertInventoryCommand(context *cli.Context) error {
 }
 
 func convertStoresCommand(context *cli.Context) error {
-	inputFormat := strings.ToLower(context.String("input-format"))
-	outputFormat := strings.ToLower(context.String("output-format"))
 	input := context.String("input")
 	output := context.String("output")
 	pretty := context.Bool("pretty")
+	inputExtension := strings.ToLower(filepath.Ext(input))
+	outputExtension := strings.ToLower(filepath.Ext(output))
 
-	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputFormat, output, outputFormat)
+	log.Debugf("Attempting to convert %s (%s) to %s (%s)", input, inputExtension, output, outputExtension)
 
 	bytes, err := ioutil.ReadFile(input)
 	if err != nil {
@@ -125,24 +126,24 @@ func convertStoresCommand(context *cli.Context) error {
 	}
 
 	var stores *systembolaget.Stores
-	if inputFormat == "xml" {
+	if inputExtension == ".xml" {
 		stores, err = systembolaget.ParseStoreFromXML(bytes)
-	} else if inputFormat == "json" {
+	} else if inputExtension == ".json" {
 		stores, err = systembolaget.ParseStoreFromJSON(bytes)
 	} else {
-		return fmt.Errorf("Unsupported input format: %s", inputFormat)
+		return fmt.Errorf("Unsupported input format: %s", inputExtension)
 	}
 	if err != nil {
 		return err
 	}
 
 	var outputBytes []byte
-	if outputFormat == "xml" {
+	if outputExtension == ".xml" {
 		outputBytes, err = stores.ConvertToXML(pretty)
-	} else if outputFormat == "json" {
+	} else if outputExtension == ".json" {
 		outputBytes, err = stores.ConvertToJSON(pretty)
 	} else {
-		return fmt.Errorf("Unsupported output format: %s", outputFormat)
+		return fmt.Errorf("Unsupported output format: %s", outputExtension)
 	}
 	if err != nil {
 		return err

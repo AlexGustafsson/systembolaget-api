@@ -6,14 +6,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"io/ioutil"
+	"path/filepath"
 	"os"
 	"strings"
 )
 
 func downloadAssortmentCommand(context *cli.Context) error {
-	format := strings.ToLower(context.String("format"))
 	output := context.String("output")
 	pretty := context.Bool("pretty")
+	extension := strings.ToLower(filepath.Ext(output))
 
 	log.Debug("Attempting to download assortment")
 	response, err := systembolaget.DownloadAssortment()
@@ -23,12 +24,12 @@ func downloadAssortmentCommand(context *cli.Context) error {
 
 	log.Debug("Downloaded data, converting to output format")
 	var outputBytes []byte
-	if format == "xml" {
+	if extension == ".xml" {
 		outputBytes, err = response.ConvertToXML(pretty)
-	} else if format == "json" {
+	} else if extension == ".json" {
 		outputBytes, err = response.ConvertToJSON(pretty)
 	} else {
-		return fmt.Errorf("Unsupported output format: %s", format)
+		return fmt.Errorf("Unsupported output extension: %s", extension)
 	}
 	if err != nil {
 		return err
@@ -48,9 +49,9 @@ func downloadAssortmentCommand(context *cli.Context) error {
 }
 
 func downloadInventoryCommand(context *cli.Context) error {
-	format := strings.ToLower(context.String("format"))
 	output := context.String("output")
 	pretty := context.Bool("pretty")
+	extension := strings.ToLower(filepath.Ext(output))
 
 	log.Debug("Attempting to download inventory")
 	response, err := systembolaget.DownloadInventory()
@@ -60,12 +61,12 @@ func downloadInventoryCommand(context *cli.Context) error {
 
 	log.Debug("Downloaded data, converting to output format")
 	var outputBytes []byte
-	if format == "xml" {
+	if extension == ".xml" {
 		outputBytes, err = response.ConvertToXML(pretty)
-	} else if format == "json" {
+	} else if extension == ".json" {
 		outputBytes, err = response.ConvertToJSON(pretty)
 	} else {
-		return fmt.Errorf("Unsupported output format: %s", format)
+		return fmt.Errorf("Unsupported output extension: %s", extension)
 	}
 	if err != nil {
 		return err
@@ -85,9 +86,9 @@ func downloadInventoryCommand(context *cli.Context) error {
 }
 
 func downloadStoresCommand(context *cli.Context) error {
-	format := strings.ToLower(context.String("format"))
 	output := context.String("output")
 	pretty := context.Bool("pretty")
+	extension := strings.ToLower(filepath.Ext(output))
 
 	log.Debug("Attempting to download stores")
 	response, err := systembolaget.DownloadStores()
@@ -97,12 +98,12 @@ func downloadStoresCommand(context *cli.Context) error {
 
 	log.Debug("Downloaded data, converting to output format")
 	var outputBytes []byte
-	if format == "xml" {
+	if extension == ".xml" {
 		outputBytes, err = response.ConvertToXML(pretty)
-	} else if format == "json" {
+	} else if extension == ".json" {
 		outputBytes, err = response.ConvertToJSON(pretty)
 	} else {
-		return fmt.Errorf("Unsupported output format: %s", format)
+		return fmt.Errorf("Unsupported output extension: %s", extension)
 	}
 	if err != nil {
 		return err

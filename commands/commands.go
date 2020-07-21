@@ -9,11 +9,6 @@ var downloadFlags = []cli.Flag{
 		Name:  "output, o",
 		Usage: "Output file",
 	},
-	&cli.StringFlag{
-		Name:  "format, f",
-		Usage: "Output format. Either JSON or XML",
-		Value: "JSON",
-	},
 	&cli.BoolFlag{
 		Name:  "pretty",
 		Usage: "Pretty print output",
@@ -29,16 +24,6 @@ var convertFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "output, o",
 		Usage: "Output file",
-	},
-	&cli.StringFlag{
-		Name:  "input-format",
-		Usage: "Input format. Either JSON or XML",
-		Value: "JSON",
-	},
-	&cli.StringFlag{
-		Name:  "output-format",
-		Usage: "Output format. Either JSON or XML",
-		Value: "JSON",
 	},
 	&cli.BoolFlag{
 		Name:  "pretty",

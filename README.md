@@ -21,13 +21,13 @@ Download the assortment and print it as an XML to STDOUT.
 Download the assortment and save it as prettified JSON to a file.
 
 ```shell
-./systembolaget download assortment --format=json --pretty --output=assortment.json
+./systembolaget download assortment --pretty --output=assortment.json
 ```
 
 Convert the assortment back to XML.
 
 ```shell
-./systembolaget convert assortment --input assortment.json --input-format=json --output=assortment.xml --output-format=xml
+./systembolaget convert assortment --input assortment.json --output=assortment.xml
 ```
 
 ## Using as a library
