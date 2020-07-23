@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"github.com/alexgustafsson/systembolaget-api/utils"
+	"github.com/jinzhu/copier"
 	"sort"
 )
 
@@ -50,59 +51,60 @@ func (a byID) Len() int           { return len(a) }
 func (a byID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 
-// DownloadInventory ...
-func DownloadInventory() (*Inventory, error) {
+
+// Download ...
+func (inventory *Inventory) Download() error {
 	// Download
 	bytes, err := utils.Download("https://www.systembolaget.se/api/assortment/stock/xml")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Unmarshal
 	var response = &InventoryInput{}
-	err = xml.Unmarshal(bytes, response)
+	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
+	// Deep copy the response into the similar, but not equal struct
+	// This is a workaround for not supporting different struct tags
+	// for serialization and deserialization
+	copier.Copy(&inventory, &response)
+
 	// Sort arrays
-	sort.Sort(byID(response.Stores))
-	for _, store := range response.Stores {
+	sort.Sort(byID(inventory.Stores))
+	for _, store := range inventory.Stores {
 		sort.Ints(store.ItemNumbers)
 	}
 
-	var convertedResponse = Inventory(*response)
-	return &convertedResponse, nil
+	return nil
 }
 
-// ParseInventoryFromXML ...
-func ParseInventoryFromXML(bytes []byte) (*Inventory, error) {
-	var response = &Inventory{}
-	err := xml.Unmarshal(bytes, &response)
-	return response, err
+// ParseFromXML ...
+func (inventory *Inventory) ParseFromXML(bytes []byte) error {
+	return xml.Unmarshal(bytes, inventory)
 }
 
-// ParseInventoryFromJSON ...
-func ParseInventoryFromJSON(bytes []byte) (*Inventory, error) {
-	var response = &Inventory{}
-	err := json.Unmarshal(bytes, &response)
-	return response, err
+// ParseFromJSON ...
+func (inventory *Inventory) ParseFromJSON(bytes []byte) error {
+	return json.Unmarshal(bytes, inventory)
 }
 
 // ConvertToJSON ...
-func (response *Inventory) ConvertToJSON(pretty bool) ([]byte, error) {
+func (inventory *Inventory) ConvertToJSON(pretty bool) ([]byte, error) {
 	if pretty {
-		return json.MarshalIndent(response, "", "  ")
+		return json.MarshalIndent(inventory, "", "  ")
 	}
 
-	return json.Marshal(response)
+	return json.Marshal(inventory)
 }
 
 // ConvertToXML ...
-func (response *Inventory) ConvertToXML(pretty bool) ([]byte, error) {
+func (inventory *Inventory) ConvertToXML(pretty bool) ([]byte, error) {
 	if pretty {
-		return xml.MarshalIndent(response, "", "  ")
+		return xml.MarshalIndent(inventory, "", "  ")
 	}
 
-	return xml.Marshal(response)
+	return xml.Marshal(inventory)
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"github.com/alexgustafsson/systembolaget-api/utils"
+	"github.com/jinzhu/copier"
 )
 
 // StoresInput ...
@@ -54,53 +55,53 @@ type Stores struct {
 	} `xml:"Store" json:"stores"`
 }
 
-// DownloadStores ...
-func DownloadStores() (*Stores, error) {
+// Download ...
+func (stores *Stores) Download() error {
 	// Download
 	bytes, err := utils.Download("https://www.systembolaget.se/api/assortment/stores/xml")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Unmarshal
 	var response = &StoresInput{}
 	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var convertedResponse = Stores(*response)
-	return &convertedResponse, nil
+	// Deep copy the response into the similar, but not equal struct
+	// This is a workaround for not supporting different struct tags
+	// for serialization and deserialization
+	copier.Copy(&stores, &response)
+
+	return nil
 }
 
-// ParseStoreFromXML ...
-func ParseStoreFromXML(bytes []byte) (*Stores, error) {
-	var response = &Stores{}
-	err := xml.Unmarshal(bytes, &response)
-	return response, err
+// ParseFromXML ...
+func (stores *Stores) ParseFromXML(bytes []byte) error {
+	return xml.Unmarshal(bytes, stores)
 }
 
-// ParseStoreFromJSON ...
-func ParseStoreFromJSON(bytes []byte) (*Stores, error) {
-	var response = &Stores{}
-	err := json.Unmarshal(bytes, &response)
-	return response, err
+// ParseFromJSON ...
+func (stores *Stores) ParseFromJSON(bytes []byte) error {
+	return json.Unmarshal(bytes, stores)
 }
 
 // ConvertToJSON ...
-func (response *Stores) ConvertToJSON(pretty bool) ([]byte, error) {
+func (stores *Stores) ConvertToJSON(pretty bool) ([]byte, error) {
 	if pretty {
-		return json.MarshalIndent(response, "", "  ")
+		return json.MarshalIndent(stores, "", "  ")
 	}
 
-	return json.Marshal(response)
+	return json.Marshal(stores)
 }
 
 // ConvertToXML ...
-func (response *Stores) ConvertToXML(pretty bool) ([]byte, error) {
+func (stores *Stores) ConvertToXML(pretty bool) ([]byte, error) {
 	if pretty {
-		return xml.MarshalIndent(response, "", "  ")
+		return xml.MarshalIndent(stores, "", "  ")
 	}
 
-	return xml.Marshal(response)
+	return xml.Marshal(stores)
 }

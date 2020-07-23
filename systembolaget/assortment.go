@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"github.com/alexgustafsson/systembolaget-api/utils"
+	"github.com/jinzhu/copier"
 )
 
 // AssortmentInput ...
@@ -86,53 +87,53 @@ type Assortment struct {
 	} `json:"items"`
 }
 
-// DownloadAssortment downloads the data and unmarshals the original XML format.
-func DownloadAssortment() (*Assortment, error) {
+// Download ...
+func (assortment *Assortment) Download() error {
 	// Download
 	bytes, err := utils.Download("https://www.systembolaget.se/api/assortment/products/xml")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Unmarshal
 	var response = &AssortmentInput{}
-	err = xml.Unmarshal(bytes, response)
+	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var convertedResponse = Assortment(*response)
-	return &convertedResponse, nil
+	// Deep copy the response into the similar, but not equal struct
+	// This is a workaround for not supporting different struct tags
+	// for serialization and deserialization
+	copier.Copy(&assortment, &response)
+
+	return nil
 }
 
-// ParseAssortmentFromXML ...
-func ParseAssortmentFromXML(bytes []byte) (*Assortment, error) {
-	var response = &Assortment{}
-	err := xml.Unmarshal(bytes, &response)
-	return response, err
+// ParseFromXML ...
+func (assortment *Assortment) ParseFromXML(bytes []byte) error {
+	return xml.Unmarshal(bytes, assortment)
 }
 
-// ParseAssortmentFromJSON ...
-func ParseAssortmentFromJSON(bytes []byte) (*Assortment, error) {
-	var response = &Assortment{}
-	err := json.Unmarshal(bytes, &response)
-	return response, err
+// ParseFromJSON ...
+func (assortment *Assortment) ParseFromJSON(bytes []byte) error {
+	return json.Unmarshal(bytes, assortment)
 }
 
 // ConvertToJSON ...
-func (response *Assortment) ConvertToJSON(pretty bool) ([]byte, error) {
+func (assortment *Assortment) ConvertToJSON(pretty bool) ([]byte, error) {
 	if pretty {
-		return json.MarshalIndent(response, "", "  ")
+		return json.MarshalIndent(assortment, "", "  ")
 	}
 
-	return json.Marshal(response)
+	return json.Marshal(assortment)
 }
 
 // ConvertToXML ...
-func (response *Assortment) ConvertToXML(pretty bool) ([]byte, error) {
+func (assortment *Assortment) ConvertToXML(pretty bool) ([]byte, error) {
 	if pretty {
-		return xml.MarshalIndent(response, "", "  ")
+		return xml.MarshalIndent(assortment, "", "  ")
 	}
 
-	return xml.Marshal(response)
+	return xml.Marshal(assortment)
 }
