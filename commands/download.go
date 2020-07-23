@@ -14,7 +14,11 @@ import (
 func download(sourceName string, context *cli.Context) error {
 	output := context.String("output")
 	pretty := context.Bool("pretty")
-	extension := strings.ToLower(filepath.Ext(output))
+	outputFormat := strings.ToLower(context.String("format"))
+	outputExtension := strings.ToLower(filepath.Ext(output))
+	if outputFormat != "" {
+		outputExtension = "." + outputFormat
+	}
 
 	log.Debugf("Attempting to download source %s", sourceName)
 	var source systembolaget.Source
@@ -33,12 +37,12 @@ func download(sourceName string, context *cli.Context) error {
 
 	log.Debug("Downloaded data, converting to output format")
 	var outputBytes []byte
-	if extension == ".xml" {
+	if outputExtension == ".xml" {
 		outputBytes, err = source.ConvertToXML(pretty)
-	} else if extension == ".json" {
+	} else if outputExtension == ".json" {
 		outputBytes, err = source.ConvertToJSON(pretty)
-	} else {
-		return fmt.Errorf("Unsupported output extension: %s", extension)
+	} else if output != "" {
+		return fmt.Errorf("Unsupported output extension: %s", outputExtension)
 	}
 	if err != nil {
 		return err

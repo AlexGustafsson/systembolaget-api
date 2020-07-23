@@ -15,8 +15,18 @@ func convert(sourceName string, context *cli.Context) error {
 	input := context.String("input")
 	output := context.String("output")
 	pretty := context.Bool("pretty")
+
+	inputFormat := strings.ToLower(context.String("input-format"))
 	inputExtension := strings.ToLower(filepath.Ext(input))
+	if inputFormat != "" {
+		inputExtension = "." + inputFormat
+	}
+
+	outputFormat := strings.ToLower(context.String("output-format"))
 	outputExtension := strings.ToLower(filepath.Ext(output))
+	if outputFormat != "" {
+		outputExtension = "." + outputFormat
+	}
 
 	log.Debugf("Attempting to convert source %s, %s (%s) to %s (%s)", sourceName, input, inputExtension, output, outputExtension)
 
@@ -50,7 +60,7 @@ func convert(sourceName string, context *cli.Context) error {
 		outputBytes, err = source.ConvertToXML(pretty)
 	} else if outputExtension == ".json" {
 		outputBytes, err = source.ConvertToJSON(pretty)
-	} else {
+	} else if output != "" {
 		return fmt.Errorf("Unsupported output format: %s", outputExtension)
 	}
 	if err != nil {

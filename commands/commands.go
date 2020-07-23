@@ -15,6 +15,11 @@ var downloadFlags = []cli.Flag{
 		Usage: "Pretty print output",
 		Value: false,
 	},
+	&cli.StringFlag{
+		Name: "format",
+		Aliases: []string{"f"},
+		Usage: "Specify the output format. Defaults to the extension of the output file",
+	},
 }
 
 var convertFlags = []cli.Flag{
@@ -32,6 +37,14 @@ var convertFlags = []cli.Flag{
 		Name:  "pretty",
 		Usage: "Pretty print output",
 		Value: false,
+	},
+	&cli.StringFlag{
+		Name: "input-format",
+		Usage: "Specify the input format. Defaults to the extension of the input file",
+	},
+	&cli.StringFlag{
+		Name: "output-format",
+		Usage: "Specify the output format. Defaults to the extension of the output file",
 	},
 }
 

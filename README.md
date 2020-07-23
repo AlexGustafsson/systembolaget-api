@@ -15,7 +15,7 @@ Start by grabbing the latest release for your platform from the releases.
 Download the assortment and print it as an XML to STDOUT.
 
 ```shell
-./systembolaget download assortment
+./systembolaget download assortment --format=xml
 ```
 
 Download the assortment and save it as prettified JSON to a file.
