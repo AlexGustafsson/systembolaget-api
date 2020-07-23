@@ -68,6 +68,7 @@ func main() {
 	app.CommandNotFound = commandNotFound
 	app.EnableBashCompletion = true
 	app.Commands = commands.Commands
+	app.HideVersion = true
 	app.Flags = []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "verbose, v",
