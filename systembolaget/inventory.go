@@ -42,15 +42,14 @@ type Inventory struct {
 	} `xml:"Store" json:"stores"`
 }
 
-type byID []struct {
+type byStoreID []struct {
 	ID          string
 	ItemNumbers []int
 }
 
-func (a byID) Len() int           { return len(a) }
-func (a byID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
-
+func (a byStoreID) Len() int           { return len(a) }
+func (a byStoreID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byStoreID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 
 // Download ...
 func (inventory *Inventory) Download() error {
@@ -73,7 +72,7 @@ func (inventory *Inventory) Download() error {
 	copier.Copy(&inventory, &response)
 
 	// Sort arrays
-	sort.Sort(byID(inventory.Stores))
+	sort.Sort(byStoreID(inventory.Stores))
 	for _, store := range inventory.Stores {
 		sort.Ints(store.ItemNumbers)
 	}
