@@ -8,14 +8,7 @@ import (
 	"sort"
 )
 
-// StoreInput ...
-type StoreInput struct {
-	ID          string `xml:"ButikNr,attr"`
-	ItemNumbers []int  `xml:"ArtikelNr"`
-}
-
-// InventoryInput ...
-type InventoryInput struct {
+type inventoryInput struct {
 	Info struct {
 		Message string `xml:"Meddelande"`
 	}
@@ -60,7 +53,7 @@ func (inventory *Inventory) Download() error {
 	}
 
 	// Unmarshal
-	var response = &InventoryInput{}
+	var response = &inventoryInput{}
 	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
 		return err

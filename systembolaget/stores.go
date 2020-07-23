@@ -7,8 +7,7 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-// StoresInput ...
-type StoresInput struct {
+type storesInput struct {
 	Info struct {
 		Message string `xml:"Meddelande"`
 	} `json:"info"`
@@ -64,7 +63,7 @@ func (stores *Stores) Download() error {
 	}
 
 	// Unmarshal
-	var response = &StoresInput{}
+	var response = &storesInput{}
 	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
 		return err

@@ -8,8 +8,7 @@ import (
 	"sort"
 )
 
-// InputItem ...
-type InputItem struct {
+type itemInput struct {
 	ID         string `xml:"nr"`
 	ItemID     string `xml:"Artikelid"`
 	ItemNumber string `xml:"Varnummer"`
@@ -42,13 +41,12 @@ type InputItem struct {
 	IngredientDescription string  `xml:"RavarorBeskrivning"`
 }
 
-// AssortmentInput ...
-type AssortmentInput struct {
+type assortmentInput struct {
 	Created string `xml:"skapad-tid"`
 	Info    struct {
 		Message string `xml:"meddelande"`
 	} `xml:"info"`
-	Items []InputItem `xml:"artikel"`
+	Items []itemInput `xml:"artikel"`
 }
 
 // Item ...
@@ -109,7 +107,7 @@ func (assortment *Assortment) Download() error {
 	}
 
 	// Unmarshal
-	var response = &AssortmentInput{}
+	var response = &assortmentInput{}
 	err = xml.Unmarshal(bytes, &response)
 	if err != nil {
 		return err
