@@ -1,6 +1,6 @@
 package systembolaget
 
-// Source ...
+// Source represents the common base for each API source.
 type Source interface {
   Download() error
   ParseFromXML(bytes []byte) error

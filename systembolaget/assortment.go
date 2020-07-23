@@ -49,7 +49,7 @@ type assortmentInput struct {
 	Items []itemInput `xml:"artikel"`
 }
 
-// Item ...
+// Item represents a single item from the assortment.
 type Item struct {
 	ID         string `json:"id"`
 	ItemID     string `json:"itemId"`
@@ -83,7 +83,8 @@ type Item struct {
 	IngredientDescription string  `json:"ingredientDescription"`
 }
 
-// Assortment ...
+// Assortment contains the entirety of Systembolaget's assortment -
+// item for item.
 type Assortment struct {
 	Created string `json:"created"`
 	Info    struct {
@@ -98,7 +99,9 @@ func (a byItemID) Len() int           { return len(a) }
 func (a byItemID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a byItemID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 
-// Download ...
+// Download downloads the data from Systembolaget's API.
+// The struct is updated with the parsed data.
+// Returns an error if the download failed or the parsing failed.
 func (assortment *Assortment) Download() error {
 	// Download
 	bytes, err := utils.Download("https://www.systembolaget.se/api/assortment/products/xml")
@@ -124,17 +127,21 @@ func (assortment *Assortment) Download() error {
 	return nil
 }
 
-// ParseFromXML ...
+// ParseFromXML parses XML bytes and updates the struct with the values.
+// Returns an error if the parsing failed.
 func (assortment *Assortment) ParseFromXML(bytes []byte) error {
 	return xml.Unmarshal(bytes, assortment)
 }
 
-// ParseFromJSON ...
+// ParseFromJSON parses JSON bytes and updates the struct with the values.
+// Returns an error if the parsing failed.
 func (assortment *Assortment) ParseFromJSON(bytes []byte) error {
 	return json.Unmarshal(bytes, assortment)
 }
 
-// ConvertToJSON ...
+// ConvertToJSON converts the struct to JSON bytes.
+// The pretty argument controls whether or not whitespace should be added.
+// Returns an error if the conversion failed.
 func (assortment *Assortment) ConvertToJSON(pretty bool) ([]byte, error) {
 	if pretty {
 		return json.MarshalIndent(assortment, "", "  ")
@@ -143,7 +150,9 @@ func (assortment *Assortment) ConvertToJSON(pretty bool) ([]byte, error) {
 	return json.Marshal(assortment)
 }
 
-// ConvertToXML ...
+// ConvertToXML converts the struct to XML bytes.
+// The pretty argument controls whether or not whitespace should be added.
+// Returns an error if the conversion failed.
 func (assortment *Assortment) ConvertToXML(pretty bool) ([]byte, error) {
 	if pretty {
 		return xml.MarshalIndent(assortment, "", "  ")

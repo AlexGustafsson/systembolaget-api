@@ -30,7 +30,7 @@ type storesInput struct {
 	} `xml:"ButikOmbud"`
 }
 
-// Stores ...
+// Stores contains information about each Systembolaget store.
 type Stores struct {
 	Info struct {
 		Message string `json:"message"`
@@ -54,7 +54,9 @@ type Stores struct {
 	} `xml:"Store" json:"stores"`
 }
 
-// Download ...
+// Download downloads the data from Systembolaget's API.
+// The struct is updated with the parsed data.
+// Returns an error if the download failed or the parsing failed.
 func (stores *Stores) Download() error {
 	// Download
 	bytes, err := utils.Download("https://www.systembolaget.se/api/assortment/stores/xml")
@@ -77,17 +79,21 @@ func (stores *Stores) Download() error {
 	return nil
 }
 
-// ParseFromXML ...
+// ParseFromXML parses XML bytes and updates the struct with the values.
+// Returns an error if the parsing failed.
 func (stores *Stores) ParseFromXML(bytes []byte) error {
 	return xml.Unmarshal(bytes, stores)
 }
 
-// ParseFromJSON ...
+// ParseFromJSON parses JSON bytes and updates the struct with the values.
+// Returns an error if the parsing failed.
 func (stores *Stores) ParseFromJSON(bytes []byte) error {
 	return json.Unmarshal(bytes, stores)
 }
 
-// ConvertToJSON ...
+// ConvertToJSON converts the struct to JSON bytes.
+// The pretty argument controls whether or not whitespace should be added.
+// Returns an error if the conversion failed.
 func (stores *Stores) ConvertToJSON(pretty bool) ([]byte, error) {
 	if pretty {
 		return json.MarshalIndent(stores, "", "  ")
@@ -96,7 +102,9 @@ func (stores *Stores) ConvertToJSON(pretty bool) ([]byte, error) {
 	return json.Marshal(stores)
 }
 
-// ConvertToXML ...
+// ConvertToXML converts the struct to XML bytes.
+// The pretty argument controls whether or not whitespace should be added.
+// Returns an error if the conversion failed.
 func (stores *Stores) ConvertToXML(pretty bool) ([]byte, error) {
 	if pretty {
 		return xml.MarshalIndent(stores, "", "  ")

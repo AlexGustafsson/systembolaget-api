@@ -7,7 +7,8 @@ import (
 	"net/http"
 )
 
-// Download ...
+// Download downloads a URL and returns the received bytes.
+// It handles logging of status codes etc.
 func Download(url string) ([]byte, error) {
 	log.Debugf("Downloading from URL %s", url)
 
