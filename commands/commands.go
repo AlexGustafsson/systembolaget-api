@@ -6,7 +6,8 @@ import (
 
 var downloadFlags = []cli.Flag{
 	&cli.StringFlag{
-		Name:  "output, o",
+		Name:  "output",
+		Aliases: []string{"o"},
 		Usage: "Output file",
 	},
 	&cli.BoolFlag{
@@ -18,11 +19,13 @@ var downloadFlags = []cli.Flag{
 
 var convertFlags = []cli.Flag{
 	&cli.StringFlag{
-		Name:  "input, i",
+		Name:  "input",
+		Aliases: []string{"i"},
 		Usage: "Input file",
 	},
 	&cli.StringFlag{
-		Name:  "output, o",
+		Name:  "output",
+		Aliases: []string{"o"},
 		Usage: "Output file",
 	},
 	&cli.BoolFlag{
