@@ -1,5 +1,7 @@
-systembolaget-api  - a cross-platform solution for fetching and converting [Systembolaget's open APIs](https://www.systembolaget.se/api/) to JSON
+systembolaget-api  - a cross-platform solution for fetching and converting [Systembolaget's open APIs](https://www.systembolaget.se/api/) to JSON and XML
 ======
+
+> This is a friendly reminder that you're currently viewing a legacy branch. To get in on all the new features, head over [here](https://github.com/AlexGustafsson/systembolaget-api).
 
 The utility is an easy to use way of fetching Systembolaget's open APIs and converting them to JSON and XML. It's written in Go and is available via several cross-platform builds.
 
