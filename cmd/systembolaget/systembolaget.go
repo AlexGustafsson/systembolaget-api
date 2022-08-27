@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/alexgustafsson/systembolaget-api/commands"
-	"github.com/alexgustafsson/systembolaget-api/version"
+	"github.com/AlexGustafsson/systembolaget-api/commands"
+	"github.com/AlexGustafsson/systembolaget-api/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"os"

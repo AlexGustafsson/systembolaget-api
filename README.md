@@ -8,6 +8,14 @@ It's usable both as a library in Go and as a standalone utility for which you ca
 # Quickstart
 <a name="quickstart"></a>
 
+## Creating an account at systembolaget
+
+Note: If you don't want to create an account, you may use the file-based APIs via the legacy branch or releases for versions lower than v2. The API may be deprecated by Systembolaget in the future without further notice. The legacy releases are no longer maintained but the file-based features may be added to future versions.
+
+1. Go to https://api-portal.systembolaget.se and sign up
+2. Subscribe to the open API via https://api-portal.systembolaget.se/products/Open%20API/subscribe
+3. Access your access tokens via your profile https://api-portal.systembolaget.se/developer
+
 ## Using as a utility
 
 Start by grabbing the latest release for your platform from the releases.
@@ -36,7 +44,7 @@ Add the necessary import.
 
 ```go
 import (
-	"github.com/alexgustafsson/systembolaget-api/systembolaget"
+	systembolaget "github.com/alexgustafsson/systembolaget-api/systembolaget/v1"
 )
 ```
 

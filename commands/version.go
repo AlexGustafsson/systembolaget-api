@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/alexgustafsson/systembolaget-api/version"
+	"github.com/AlexGustafsson/systembolaget-api/version"
 	"github.com/urfave/cli/v2"
 )
 

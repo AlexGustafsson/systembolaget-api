@@ -7,14 +7,16 @@ import (
 	"net/http"
 )
 
-// Download downloads a URL and returns the received bytes.
-// It handles logging of status codes etc.
-func Download(url string) ([]byte, error) {
-	log.Debugf("Downloading from URL %s", url)
+// Download performs a HTTP request.
+// It handles logging and verification of status codes etc.
+func Download(request *http.Request) ([]byte, error) {
+	log.Debugf("Downloading from URL %s", request.URL)
 
-	response, err := http.Get(url)
+	client := &http.Client{}
+
+	response, err := client.Do(request)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to create request: %v", err)
+		return nil, fmt.Errorf("Unable to receive response: %v", err)
 	}
 
 	defer response.Body.Close()
@@ -29,6 +31,6 @@ func Download(url string) ([]byte, error) {
 		return nil, fmt.Errorf("Error while reading body: %v", err)
 	}
 
-	log.Debugf("Successfully downloaded data for URL %s", url)
+	log.Debugf("Successfully downloaded data")
 	return data, nil
 }
