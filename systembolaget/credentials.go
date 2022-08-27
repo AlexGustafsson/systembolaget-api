@@ -1,0 +1,93 @@
+package systembolaget
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"regexp"
+	"strings"
+)
+
+var appSettingsPathRegex = regexp.MustCompile(`"appSettingsFilePath":"([^"]+)"`)
+var appSettingsRegex = regexp.MustCompile(`(?s)Object.freeze\((\{.*\})\)`)
+
+// GetAPIKey returns the API credentials used by the Systembolaget
+// frontend.
+func GetAPIKey(ctx context.Context) (string, error) {
+	appSettings, err := getAppSettings(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	apiKeyValue, ok := appSettings["ocpApimSubscriptionKey"]
+	if !ok {
+		return "", fmt.Errorf("malformed app settings")
+	}
+	apiKey, ok := apiKeyValue.(string)
+	if !ok {
+		return "", fmt.Errorf("malformed app settings")
+	}
+
+	return apiKey, nil
+}
+
+func getAppSettings(ctx context.Context) (map[string]any, error) {
+	appSettingsScriptPath, err := getAppSettingsScriptPath(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := http.DefaultClient.Get("https://www.systembolaget.se/" + appSettingsScriptPath)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
+	}
+
+	source, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	match := appSettingsRegex.FindSubmatch(source)
+	if match == nil {
+		return nil, fmt.Errorf("unable to identify appsettings script path")
+	}
+
+	var settings map[string]any
+	if err := json.Unmarshal(match[1], &settings); err != nil {
+		return nil, err
+	}
+
+	return settings, nil
+}
+
+func getAppSettingsScriptPath(ctx context.Context) (string, error) {
+	res, err := http.DefaultClient.Get("https://www.systembolaget.se")
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
+	}
+
+	source, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	match := appSettingsPathRegex.FindSubmatch(source)
+	if match == nil {
+		return "", fmt.Errorf("unable to identify appsettings script path")
+	}
+
+	// The path seems to always be prefixed with "~/"
+	return strings.TrimPrefix(string(match[1]), "~/"), nil
+}

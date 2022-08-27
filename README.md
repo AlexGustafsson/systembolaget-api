@@ -1,89 +1,142 @@
-systembolaget-api  - a cross-platform solution for fetching and converting [Systembolaget's open APIs](https://www.systembolaget.se/api/) to JSON
-======
+# Systembolaget API
 
-The utility is an easy to use way of fetching Systembolaget's open APIs and converting them to JSON and XML. It's written in Go and is available via several cross-platform builds.
+A cross-platform solution for fetching closed and open Systembolaget APIs.
 
-It's usable both as a library in Go and as a standalone utility for which you can find release builds [here](https://github.com/AlexGustafsson/systembolaget-api-fetch/releases/).
+The utility is an easy to use way of fetching Systembolaget's open and closed APIs.
+It's written in Go and is available via several cross-platform builds.
 
-# Quickstart
+It's usable both as a library in Go and as a standalone utility for which you can find release builds
+[here](https://github.com/AlexGustafsson/systembolaget-api-fetch/releases/).
+
+## Quickstart
 <a name="quickstart"></a>
 
-## Using as a utility
+### Using as a utility
 
 Start by grabbing the latest release for your platform from the releases.
 
-Download the assortment and print it as an XML to STDOUT.
+Search for beers produced in Sweden that were recently put up for sale.
 
 ```shell
-./systembolaget download assortment --format=xml
+systembolaget assortment --category "Öl" --origin "Sverige" --sort-by "ProductLaunchDate"
 ```
 
-Download the assortment and save it as prettified JSON to a file.
+Get the names of Sake with a sweetness of between 5 and 12.
 
 ```shell
-./systembolaget download assortment --pretty --output=assortment.json
+systembolaget assortment --taste-clock-sweetness 5,12 --category Vin --subcategory Sake | jq -cr '.[].productNameBold'
 ```
 
-Convert the assortment back to XML.
+Get the names of non-alcoholic beverages in glass bottles.
 
 ```shell
-./systembolaget convert assortment --input assortment.json --output=assortment.xml
+systembolaget assortment --alcohol-percentage 0,0 --packaging-category Flaska --limit 5 | jq -cr '.[].productNameBold'
 ```
 
-## Using as a library
+Download the full assortment.
+
+```shell
+systembolaget assortment --sort-by "Name" --ascending
+```
+
+Fetch all stores.
+
+```shell
+systembolaget stores
+```
+
+An excerpt from the results is shown below. For samples, see the samples directory.
+
+```json
+{
+  "productNameBold": "Melleruds",
+  "productNameThin": "Utmärkta Pilsner",
+  "alcoholPercentage": 4.5,
+  "assortmentText": "Fast sortiment",
+  "bottleText": "Flaska",
+  "categoryLevel1": "Öl",
+  "categoryLevel2": "Ljus lager",
+  "categoryLevel3": "Pilsner - tysk stil",
+  "color": "Gul färg.",
+  "country": "Sverige",
+  "customCategoryTitle": "Öl, Ljus lager, Pilsner - tysk stil",
+  "tasteClockBitter": 6,
+  "tasteClockBody": 6,
+  "tasteClockCasque": 1,
+  "tasteClockFruitacid": 0,
+  "tasteClockSweetness": 1,
+  "tasteSymbols": ["Fläsk", "Fisk", "Buffémat", "Sällskapsdryck"],
+  "usage": "Serveras vid 10-12°C som sällskapsdryck, till buffé eller till rätter av fisk eller ljust kött. "
+ // ...
+}
+```
+
+### Using as a library
 
 Add the necessary import.
 
 ```go
 import (
-	"github.com/alexgustafsson/systembolaget-api/systembolaget"
+ "github.com/alexgustafsson/systembolaget-api/v2/systembolaget"
 )
 ```
 
-Download assortment.
+Create a client.
 
 ```go
-response, err := systembolaget.DownloadAssortment()
+client := systembolaget.NewClient(apiKey)
 ```
 
-Convert to prettified XML.
+Perform a search for a light lager that goes with meat.
 
 ```go
-xml, err := response.ConvertToXML(true)
+res, _ := client.Search(
+ ctx.TODO(),
+ &systembolaget.SearchOptions{
+  SortBy:        systembolaget.SortPropertyScore,
+  SortDirection: systembolaget.SortDirectionDescending,
+ },
+ systembolaget.FilterByCategory("Öl", "Ljus Lager", ""),
+ systembolaget.FilterByMatch("Kött"),
+)
+fmt.Println(res.Products)
 ```
 
-Convert to minimal JSON.
-
-```go
-json, err := response.ConvertToJSON(false)
-```
-
-Load from JSON
-
-```go
-assortment, err := systembolaget.ParseAssortmentFromJSON(fileBytes)
-```
-
-# Table of contents
+## Table of contents
 
 [Quickstart](#quickstart)<br/>
 [Use cases](#usecases)<br/>
-[Contributing](#contributing)<br/>
-[Disclaimer](#disclaimer)
+[Contributing](#contributing)
 
-# Use cases
+## Use cases
 <a name="usecases"></a>
 
-The utility can be used to automatically grab the latest available data in XML or JSON format. The data can be used to create interesting statistical charts, recommendation apps, search engines and more.
+The utility can be used to automatically grab the latest available data from Systembolagt. The data can be used to create
+interesting statistical charts, archives and more. Note however that data derived from the platform should not be used
+in a way that goes against [Systembolaget's mission](https://www.omsystembolaget.se/english/systembolaget-explained/).
 
-# Contributing
+For archived data, please refer to <https://github.com/alexgustafsson/systembolaget-api-data>.
+
+## Contributing
 <a name="contributing"></a>
 
-Any help with the project is more than welcome. This is my first take on Go and its ecosystem so some things might not be following best practices or be incorrectly implemented all together.
+Any help with the project is more than welcome.
 
-# Disclaimer
-<a name="disclaimer"></a>
+### Building
 
-_Although the project is very capable, it is not built with production in mind. Therefore there might be complications when trying to use systembolaget-api for large-scale projects meant for the public. The utility was created to easily integrate Systembolaget's open APIs on several platforms and as such it might not promote best practices nor be performant._
+```shell
+# Build
+make
 
-_The author nor the utility is in any way affiliated with Systembolaget._
+# Format code
+make format
+
+# Lint code
+make lint
+
+# Vet the code
+make vet
+
+# Run tests
+make test
+```

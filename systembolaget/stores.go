@@ -1,114 +1,95 @@
 package systembolaget
 
 import (
+	"compress/gzip"
+	"context"
 	"encoding/json"
-	"encoding/xml"
-	"github.com/alexgustafsson/systembolaget-api/utils"
-	"github.com/jinzhu/copier"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 )
 
-type storesInput struct {
-	Info struct {
-		Message string `xml:"Meddelande"`
-	} `json:"info"`
-	Stores []struct {
-		Type         string `xml:"Typ"`
-		ID           string `xml:"Nr"`
-		Name         string `xml:"Namn"`
-		Address1     string
-		Address2     string
-		Address3     string
-		Address4     string
-		Address5     string
-		PhoneNumber  string `xml:"Telefon"`
-		StoreType    string `xml:"ButiksTyp"`
-		Services     string `xml:"Tjanster"`
-		Keywords     string `xml:"SokOrd"`
-		OpeningHours string `xml:"Oppettider"`
-		RT90x        string
-		RT90y        string
-	} `xml:"ButikOmbud"`
+// Store represents a Systembolaget store.
+type Store struct {
+	ID         string `json:"siteId"`
+	Alias      string `json:"alias"`
+	Address    string `json:"address"`
+	PostalCode string `json:"postalCode"`
+	City       string `json:"city"`
+	Phone      string `json:"phone"`
+	County     string `json:"county"`
+	Position   struct {
+		Latitude  float64 `json:"latitude"`
+		Longitude float64 `json:"longitude"`
+	}
+	OpeningHours []StoreOpeningHours `json:"openingHours"`
 }
 
-// Stores contains information about each Systembolaget store.
-type Stores struct {
-	Info struct {
-		Message string `json:"message"`
-	} `json:"info"`
-	Stores []struct {
-		Type         string `json:"type"`
-		ID           string `json:"id"`
-		Name         string `json:"name"`
-		Address1     string `json:"address1"`
-		Address2     string `json:"address2"`
-		Address3     string `json:"address3"`
-		Address4     string `json:"address4"`
-		Address5     string `json:"address5"`
-		PhoneNumber  string `json:"phoneNumber"`
-		StoreType    string `json:"storeType"`
-		Services     string `json:"services"`
-		Keywords     string `json:"keywords"`
-		OpeningHours string `json:"openingHours"`
-		RT90x        string `json:"rt90x"`
-		RT90y        string `json:"rt90y"`
-	} `xml:"Store" json:"stores"`
+type StoreOpeningHours struct {
+	// Date is the date the entry is for.
+	Date string `json:"date"`
+	// OpenFrom specifies the hour that the store opens.
+	OpenFrom string `json:"openFrom"`
+	// OpenTo specifies the hour that the store closes.
+	OpenTo string `json:"openTo"`
+	// Reason optionally specifies the reason for deviating opening hours.
+	Reason string `json:"reason"`
 }
 
-// Download downloads the data from Systembolaget's API.
-// The struct is updated with the parsed data.
-// Returns an error if the download failed or the parsing failed.
-func (stores *Stores) Download() error {
-	// Download
-	bytes, err := utils.Download("https://www.systembolaget.se/api/assortment/stores/xml")
+// Stores fetches available stores.
+func (c *Client) Stores(ctx context.Context) ([]Store, error) {
+	u := &url.URL{
+		Scheme: "https",
+		Host:   "api-extern.systembolaget.se",
+		Path:   "/site/V2/Store",
+	}
+
+	header := http.Header{}
+	header.Set("Origin", "https://www.systembolaget.se")
+	header.Set("Access-Control-Allow-Origin", "*")
+	header.Set("Pragma", "no-cache")
+	header.Set("Accept", "application/json")
+	header.Set("Accept-Encoding", "gzip")
+	header.Set("Cache-Control", "no-cache")
+	header.Set("Ocp-Apim-Subscription-Key", c.apiKey)
+
+	if c.userAgent != "" {
+		header.Set("User-Agent", c.userAgent)
+	}
+
+	req := (&http.Request{
+		Method: http.MethodGet,
+		URL:    u,
+		Header: header,
+	}).Clone(ctx)
+
+	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Unmarshal
-	var response = &storesInput{}
-	err = xml.Unmarshal(bytes, &response)
-	if err != nil {
-		return err
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
-	// Deep copy the response into the similar, but not equal struct
-	// This is a workaround for not supporting different struct tags
-	// for serialization and deserialization
-	copier.Copy(&stores, &response)
+	var reader io.ReadCloser
+	switch res.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(res.Body)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		reader = res.Body
+	}
+	defer reader.Close()
 
-	return nil
-}
-
-// ParseFromXML parses XML bytes and updates the struct with the values.
-// Returns an error if the parsing failed.
-func (stores *Stores) ParseFromXML(bytes []byte) error {
-	return xml.Unmarshal(bytes, stores)
-}
-
-// ParseFromJSON parses JSON bytes and updates the struct with the values.
-// Returns an error if the parsing failed.
-func (stores *Stores) ParseFromJSON(bytes []byte) error {
-	return json.Unmarshal(bytes, stores)
-}
-
-// ConvertToJSON converts the struct to JSON bytes.
-// The pretty argument controls whether or not whitespace should be added.
-// Returns an error if the conversion failed.
-func (stores *Stores) ConvertToJSON(pretty bool) ([]byte, error) {
-	if pretty {
-		return json.MarshalIndent(stores, "", "  ")
+	var result []Store
+	decoder := json.NewDecoder(reader)
+	if err := decoder.Decode(&result); err != nil {
+		return nil, err
 	}
 
-	return json.Marshal(stores)
-}
-
-// ConvertToXML converts the struct to XML bytes.
-// The pretty argument controls whether or not whitespace should be added.
-// Returns an error if the conversion failed.
-func (stores *Stores) ConvertToXML(pretty bool) ([]byte, error) {
-	if pretty {
-		return xml.MarshalIndent(stores, "", "  ")
-	}
-
-	return xml.Marshal(stores)
+	return result, nil
 }

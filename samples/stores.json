@@ -1,0 +1,111 @@
+{
+  "siteId": "0102",
+  "alias": "Fältöversten",
+  "address": "Karlaplan 13",
+  "postalCode": "115 20",
+  "city": "STOCKHOLM",
+  "phone": "08/662 22 89",
+  "county": "Stockholms län",
+  "Position": {
+    "latitude": 59.3388103109104,
+    "longitude": 18.09087976878224
+  },
+  "openingHours": [
+    {
+      "date": "2022-08-21T00:00:00",
+      "openFrom": "00:00:00",
+      "openTo": "00:00:00",
+      "reason": "-"
+    },
+    {
+      "date": "2022-08-22T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-23T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-24T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-25T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-26T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-27T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "15:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-28T00:00:00",
+      "openFrom": "00:00:00",
+      "openTo": "00:00:00",
+      "reason": "-"
+    },
+    {
+      "date": "2022-08-29T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-30T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-08-31T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-09-01T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-09-02T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-09-03T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "15:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2022-09-04T00:00:00",
+      "openFrom": "00:00:00",
+      "openTo": "00:00:00",
+      "reason": "-"
+    },
+    {
+      "date": "2022-09-05T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    }
+  ]
+}
