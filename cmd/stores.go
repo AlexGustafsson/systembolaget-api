@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 
@@ -18,10 +17,9 @@ func ActionStores(ctx *cli.Context) error {
 	}
 	ctxWithLogging := systembolaget.SetLogger(ctx.Context, log)
 
-	log.Debug("Fetching API key")
-	apiKey, err := systembolaget.GetAPIKey(ctxWithLogging)
+	apiKey, err := getAPIKey(ctx, log)
 	if err != nil {
-		return fmt.Errorf("failed to get API key, please specify one")
+		return err
 	}
 
 	client := systembolaget.NewClient(apiKey)

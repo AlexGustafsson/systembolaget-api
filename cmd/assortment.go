@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"time"
@@ -55,10 +54,9 @@ func ActionAssortment(ctx *cli.Context) error {
 	}
 	ctxWithLogging := systembolaget.SetLogger(ctx.Context, log)
 
-	log.Debug("Fetching API key")
-	apiKey, err := systembolaget.GetAPIKey(ctxWithLogging)
+	apiKey, err := getAPIKey(ctx, log)
 	if err != nil {
-		return fmt.Errorf("failed to get API key, please specify one")
+		return err
 	}
 
 	delayBetweenPages := ctx.Duration("page-delay")
