@@ -10,6 +10,7 @@ import (
 
 	"github.com/alexgustafsson/systembolaget-api/v2/systembolaget"
 	"github.com/urfave/cli/v2"
+	"go.uber.org/zap"
 )
 
 type JSONStream struct {
@@ -48,13 +49,14 @@ func (s *JSONStream) Close() error {
 }
 
 func ActionAssortment(ctx *cli.Context) error {
-	// TODO: enumflag and rangeflag does not work due to String being required
-	// by both cli.Flag and flag.Value. cli.Flag is for getting help output,
-	// flag.Value is for getting the value as a string.
-	// Solution is probably to make the value a specific type, not having anything
-	// to do with the flag type as it does now.
+	log, err := configureLogging(ctx)
+	if err != nil {
+		return err
+	}
+	ctxWithLogging := systembolaget.SetLogger(ctx.Context, log)
 
-	apiKey, err := systembolaget.GetAPIKey(ctx.Context)
+	log.Debug("Fetching API key")
+	apiKey, err := systembolaget.GetAPIKey(ctxWithLogging)
 	if err != nil {
 		return fmt.Errorf("failed to get API key, please specify one")
 	}
@@ -171,20 +173,34 @@ func ActionAssortment(ctx *cli.Context) error {
 		}
 	}
 
+	log.Debug("Retrieving cursor")
 	cursor := client.SearchWithCursor(options, filters...)
 
-	out := NewJSONStream(os.Stdout)
+	var output io.Writer
+	if ctx.String("output") == "" {
+		output = os.Stdout
+	} else {
+		file, err := os.OpenFile(ctx.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatal("Failed to open output file", zap.Error(err))
+		}
+		defer file.Close()
+		output = file
+	}
 
+	out := NewJSONStream(output)
+
+	log.Debug("Fetching results")
 	fetchedResults := 0
-	for cursor.Next(ctx.Context, delayBetweenPages) {
+	for cursor.Next(ctxWithLogging, delayBetweenPages) {
 		if err := cursor.Error(); err != nil {
 			out.Close()
-			return err
+			log.Fatal("Failed to fetch next item", zap.Error(err))
 		}
 
 		if err := out.Write(cursor.At()); err != nil {
 			out.Close()
-			return err
+			log.Fatal("Failed to write result", zap.Error(err))
 		}
 
 		fetchedResults++
@@ -194,5 +210,6 @@ func ActionAssortment(ctx *cli.Context) error {
 	}
 
 	out.Close()
+	log.Debug("All results have been processed")
 	return nil
 }

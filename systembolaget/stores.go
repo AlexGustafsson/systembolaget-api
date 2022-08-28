@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"go.uber.org/zap"
 )
 
 // Store represents a Systembolaget store.
@@ -39,11 +41,15 @@ type StoreOpeningHours struct {
 
 // Stores fetches available stores.
 func (c *Client) Stores(ctx context.Context) ([]Store, error) {
+	log := GetLogger(ctx)
+
 	u := &url.URL{
 		Scheme: "https",
 		Host:   "api-extern.systembolaget.se",
 		Path:   "/site/V2/Store",
 	}
+
+	log = log.With(zap.String("url", u.String()))
 
 	header := http.Header{}
 	header.Set("Origin", "https://www.systembolaget.se")
@@ -64,12 +70,16 @@ func (c *Client) Stores(ctx context.Context) ([]Store, error) {
 		Header: header,
 	}).Clone(ctx)
 
+	log.Debug("Performing request")
 	res, err := c.httpClient.Do(req)
 	if err != nil {
+		log.Error("Request failed")
 		return nil, err
 	}
 
 	if res.StatusCode != http.StatusOK {
+		log.Error("Got unexpected status code", zap.Int("statusCode", res.StatusCode), zap.String("status", res.Status))
+
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
@@ -78,6 +88,7 @@ func (c *Client) Stores(ctx context.Context) ([]Store, error) {
 	case "gzip":
 		reader, err = gzip.NewReader(res.Body)
 		if err != nil {
+			log.Error("Failed to create gzip reader", zap.Error(err))
 			return nil, err
 		}
 	default:
@@ -88,6 +99,7 @@ func (c *Client) Stores(ctx context.Context) ([]Store, error) {
 	var result []Store
 	decoder := json.NewDecoder(reader)
 	if err := decoder.Decode(&result); err != nil {
+		log.Error("Failed to decode body", zap.Error(err))
 		return nil, err
 	}
 

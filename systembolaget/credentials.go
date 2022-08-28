@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 var appSettingsPathRegex = regexp.MustCompile(`"appSettingsFilePath":"([^"]+)"`)
@@ -34,33 +36,43 @@ func GetAPIKey(ctx context.Context) (string, error) {
 }
 
 func getAppSettings(ctx context.Context) (map[string]any, error) {
+	log := GetLogger(ctx)
+
+	log.Debug("Fetching app settings script path")
 	appSettingsScriptPath, err := getAppSettingsScriptPath(ctx)
 	if err != nil {
 		return nil, err
 	}
+	log = log.With(zap.String("appSettingsScriptPath", appSettingsScriptPath))
 
+	log.Debug("Fetching app settings")
 	res, err := http.DefaultClient.Get("https://www.systembolaget.se/" + appSettingsScriptPath)
 	if err != nil {
+		log.Error("Request failed", zap.Error(err))
 		return nil, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
+		log.Error("Got unexpected status code", zap.Int("statusCode", res.StatusCode), zap.String("status", res.Status))
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
 	source, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Error("Failed to read body")
 		return nil, err
 	}
 
 	match := appSettingsRegex.FindSubmatch(source)
 	if match == nil {
+		log.Error("Unable to find script path")
 		return nil, fmt.Errorf("unable to identify appsettings script path")
 	}
 
 	var settings map[string]any
 	if err := json.Unmarshal(match[1], &settings); err != nil {
+		log.Error("Failed to decode body", zap.Error(err))
 		return nil, err
 	}
 
@@ -68,23 +80,30 @@ func getAppSettings(ctx context.Context) (map[string]any, error) {
 }
 
 func getAppSettingsScriptPath(ctx context.Context) (string, error) {
+	log := GetLogger(ctx)
+
+	log.Debug("Fetching systembolaget.se")
 	res, err := http.DefaultClient.Get("https://www.systembolaget.se")
 	if err != nil {
+		log.Error("Request failed", zap.Error(err))
 		return "", err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
+		log.Error("Got unexpected status code", zap.Int("statusCode", res.StatusCode), zap.String("status", res.Status))
 		return "", fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
 	source, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Error("Failed to read body")
 		return "", err
 	}
 
 	match := appSettingsPathRegex.FindSubmatch(source)
 	if match == nil {
+		log.Error("Unable to find script path")
 		return "", fmt.Errorf("unable to identify appsettings script path")
 	}
 

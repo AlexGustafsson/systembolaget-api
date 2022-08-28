@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 // Range describes a range of numbers.
@@ -82,6 +84,8 @@ type SearchCursor struct {
 func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration) bool {
 	c.index++
 
+	log := GetLogger(ctx).With(zap.Duration("delayBetweenPages", delayBetweenPages))
+
 	// There's at least one product left on the current page
 	if c.currentPage != nil && c.index < len(c.currentPage.Products) {
 		c.currentError = nil
@@ -90,6 +94,7 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 
 	// There are no more pages
 	if !c.hasNextPage() {
+		log.Debug("No more pages")
 		c.index = -1
 		c.currentError = nil
 		return false
@@ -98,9 +103,10 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 	// Move on to the next page after waiting for the specified amount of time
 	// The first page is fetched immediately
 	if c.currentPage != nil {
+		log.Debug("Waiting")
 		<-time.After(delayBetweenPages)
 	}
-	c.currentError = c.nextPage(ctx)
+	c.currentError = c.nextPage(ctx, log)
 
 	return len(c.currentPage.Products) > 0
 }
@@ -113,11 +119,13 @@ func (c *SearchCursor) hasNextPage() bool {
 }
 
 // nextPage fetches the next page.
-func (c *SearchCursor) nextPage(ctx context.Context) error {
+func (c *SearchCursor) nextPage(ctx context.Context, log *zap.Logger) error {
 	c.options.Page++
 	c.index = 0
 
-	nextPage, err := c.client.Search(ctx, &c.options, c.filters...)
+	log = log.With(zap.Int("index", c.index))
+
+	nextPage, err := c.client.Search(SetLogger(ctx, log), &c.options, c.filters...)
 	if err != nil {
 		return err
 	}
@@ -331,6 +339,8 @@ func FilterByCategory(category string, subcategory string, subsubcategory string
 
 // Search searches for products.
 func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...SearchFilter) (*SearchResult, error) {
+	log := GetLogger(ctx)
+
 	if options.PageSize == 0 {
 		options.PageSize = 30
 	}
@@ -361,6 +371,8 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 		RawQuery: query.Encode(),
 	}
 
+	log = log.With(zap.String("url", u.String()))
+
 	header := http.Header{}
 	header.Set("Origin", "https://www.systembolaget.se")
 	header.Set("Access-Control-Allow-Origin", "*")
@@ -380,12 +392,15 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 		Header: header,
 	}).Clone(ctx)
 
+	log.Debug("Performing request")
 	res, err := c.httpClient.Do(req)
 	if err != nil {
+		log.Error("Request failed", zap.Error(err))
 		return nil, err
 	}
 
 	if res.StatusCode != http.StatusOK {
+		log.Error("Got unexpected status code", zap.Int("statusCode", res.StatusCode), zap.String("status", res.Status))
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
@@ -394,6 +409,7 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	case "gzip":
 		reader, err = gzip.NewReader(res.Body)
 		if err != nil {
+			log.Error("Failed to create gzip reader", zap.Error(err))
 			return nil, err
 		}
 	default:
@@ -404,9 +420,11 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	var result SearchResult
 	decoder := json.NewDecoder(reader)
 	if err := decoder.Decode(&result); err != nil {
+		log.Error("Failed to decode body", zap.Error(err))
 		return nil, err
 	}
 
+	log.Debug("Got results", zap.Int("results", result.Metadata.DocumentCount), zap.Int("nextPage", result.Metadata.NextPage))
 	return &result, nil
 }
 

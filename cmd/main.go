@@ -35,6 +35,12 @@ func main() {
 	app.Name = filepath.Base(os.Args[0])
 	app.Usage = "Interact with Systembolagets APIs"
 	app.HideVersion = true
+	app.Flags = []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "verbose",
+			Usage: "Enable verbose logs",
+		},
+	}
 	app.Commands = []*cli.Command{
 		{
 			Name:   "assortment",
@@ -45,6 +51,12 @@ func main() {
 					Name:    "api-key",
 					Aliases: []string{"k"},
 					Usage:   "API key to use. Defaults to automatically fetching one",
+				},
+				&cli.PathFlag{
+					Name:      "output",
+					Aliases:   []string{"o"},
+					Usage:     "Path to output",
+					TakesFile: true,
 				},
 				&cli.DurationFlag{
 					Name:  "page-delay",
@@ -189,6 +201,12 @@ func main() {
 					Name:    "api-key",
 					Aliases: []string{"k"},
 					Usage:   "API key to use",
+				},
+				&cli.PathFlag{
+					Name:      "output",
+					Aliases:   []string{"o"},
+					Usage:     "Path to output",
+					TakesFile: true,
 				},
 			},
 		},
