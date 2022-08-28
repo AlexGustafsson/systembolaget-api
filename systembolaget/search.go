@@ -107,6 +107,9 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 		<-time.After(delayBetweenPages)
 	}
 	c.currentError = c.nextPage(ctx, log)
+	if c.currentError != nil {
+		return false
+	}
 
 	return len(c.currentPage.Products) > 0
 }
