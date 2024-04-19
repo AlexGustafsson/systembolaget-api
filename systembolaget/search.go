@@ -6,12 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 // Range describes a range of numbers.
@@ -84,7 +83,7 @@ type SearchCursor struct {
 func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration) bool {
 	c.index++
 
-	log := GetLogger(ctx).With(zap.Duration("delayBetweenPages", delayBetweenPages))
+	log := GetLogger(ctx).With(slog.Duration("delayBetweenPages", delayBetweenPages))
 
 	// There's at least one product left on the current page
 	if c.currentPage != nil && c.index < len(c.currentPage.Products) {
@@ -122,11 +121,11 @@ func (c *SearchCursor) hasNextPage() bool {
 }
 
 // nextPage fetches the next page.
-func (c *SearchCursor) nextPage(ctx context.Context, log *zap.Logger) error {
+func (c *SearchCursor) nextPage(ctx context.Context, log *slog.Logger) error {
 	c.options.Page++
 	c.index = 0
 
-	log = log.With(zap.Int("index", c.index))
+	log = log.With(slog.Int("index", c.index))
 
 	nextPage, err := c.client.Search(SetLogger(ctx, log), &c.options, c.filters...)
 	if err != nil {
@@ -374,7 +373,7 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 		RawQuery: query.Encode(),
 	}
 
-	log = log.With(zap.String("url", u.String()))
+	log = log.With(slog.String("url", u.String()))
 
 	header := http.Header{}
 	header.Set("Origin", "https://www.systembolaget.se")
@@ -398,12 +397,12 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	log.Debug("Performing request")
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		log.Error("Request failed", zap.Error(err))
+		log.Error("Request failed", slog.Any("error", err))
 		return nil, err
 	}
 
 	if res.StatusCode != http.StatusOK {
-		log.Error("Got unexpected status code", zap.Int("statusCode", res.StatusCode), zap.String("status", res.Status))
+		log.Error("Got unexpected status code", slog.Int("statusCode", res.StatusCode), slog.String("status", res.Status))
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
@@ -412,7 +411,7 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	case "gzip":
 		reader, err = gzip.NewReader(res.Body)
 		if err != nil {
-			log.Error("Failed to create gzip reader", zap.Error(err))
+			log.Error("Failed to create gzip reader", slog.Any("error", err))
 			return nil, err
 		}
 	default:
@@ -423,11 +422,11 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	var result SearchResult
 	decoder := json.NewDecoder(reader)
 	if err := decoder.Decode(&result); err != nil {
-		log.Error("Failed to decode body", zap.Error(err))
+		log.Error("Failed to decode body", slog.Any("error", err))
 		return nil, err
 	}
 
-	log.Debug("Got results", zap.Int("results", result.Metadata.DocumentCount), zap.Int("nextPage", result.Metadata.NextPage))
+	log.Debug("Got results", slog.Int("results", result.Metadata.DocumentCount), slog.Int("nextPage", result.Metadata.NextPage))
 	return &result, nil
 }
 

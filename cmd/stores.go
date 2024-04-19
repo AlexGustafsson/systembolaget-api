@@ -3,18 +3,15 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"os"
 
-	"github.com/alexgustafsson/systembolaget-api/v2/systembolaget"
+	"github.com/alexgustafsson/systembolaget-api/v3/systembolaget"
 	"github.com/urfave/cli/v2"
-	"go.uber.org/zap"
 )
 
 func ActionStores(ctx *cli.Context) error {
-	log, err := configureLogging(ctx)
-	if err != nil {
-		return err
-	}
+	log := configureLogging(ctx)
 	ctxWithLogging := systembolaget.SetLogger(ctx.Context, log)
 
 	apiKey, err := getAPIKey(ctx, log)
@@ -30,7 +27,8 @@ func ActionStores(ctx *cli.Context) error {
 	} else {
 		file, err := os.OpenFile(ctx.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Fatal("Failed to open output file", zap.Error(err))
+			log.Error("Failed to open output file", slog.Any("error", err))
+			return err
 		}
 		defer file.Close()
 		output = file

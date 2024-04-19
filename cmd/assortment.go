@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"os"
 	"time"
 
-	"github.com/alexgustafsson/systembolaget-api/v2/systembolaget"
+	"github.com/alexgustafsson/systembolaget-api/v3/systembolaget"
 	"github.com/urfave/cli/v2"
-	"go.uber.org/zap"
 )
 
 type JSONStream struct {
@@ -48,10 +48,7 @@ func (s *JSONStream) Close() error {
 }
 
 func ActionAssortment(ctx *cli.Context) error {
-	log, err := configureLogging(ctx)
-	if err != nil {
-		return err
-	}
+	log := configureLogging(ctx)
 	ctxWithLogging := systembolaget.SetLogger(ctx.Context, log)
 
 	apiKey, err := getAPIKey(ctx, log)
@@ -180,7 +177,8 @@ func ActionAssortment(ctx *cli.Context) error {
 	} else {
 		file, err := os.OpenFile(ctx.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Fatal("Failed to open output file", zap.Error(err))
+			log.Error("Failed to open output file", slog.Any("error", err))
+			return err
 		}
 		defer file.Close()
 		output = file
@@ -193,12 +191,14 @@ func ActionAssortment(ctx *cli.Context) error {
 	for cursor.Next(ctxWithLogging, delayBetweenPages) {
 		if err := cursor.Error(); err != nil {
 			out.Close()
-			log.Fatal("Failed to fetch next item", zap.Error(err))
+			log.Error("Failed to fetch next item", slog.Any("error", err))
+			return err
 		}
 
 		if err := out.Write(cursor.At()); err != nil {
 			out.Close()
-			log.Fatal("Failed to write result", zap.Error(err))
+			log.Error("Failed to write result", slog.Any("error", err))
+			return err
 		}
 
 		fetchedResults++

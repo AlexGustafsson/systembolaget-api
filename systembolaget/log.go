@@ -3,25 +3,24 @@ package systembolaget
 import (
 	"context"
 	"fmt"
-
-	"go.uber.org/zap"
+	"log/slog"
 )
 
 type logKeyType struct{}
 
 var logKey = logKeyType{}
 
-func SetLogger(ctx context.Context, log *zap.Logger) context.Context {
+func SetLogger(ctx context.Context, log *slog.Logger) context.Context {
 	return context.WithValue(ctx, logKey, log)
 }
 
-func GetLogger(ctx context.Context) *zap.Logger {
+func GetLogger(ctx context.Context) *slog.Logger {
 	value := ctx.Value(logKey)
 	if value == nil {
-		return zap.NewNop()
+		return slog.Default()
 	}
 
-	log, ok := value.(*zap.Logger)
+	log, ok := value.(*slog.Logger)
 	if !ok {
 		panic(fmt.Errorf("invalid value for logger in logger"))
 	}

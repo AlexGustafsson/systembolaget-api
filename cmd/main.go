@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alexgustafsson/systembolaget-api/v2/systembolaget"
+	"github.com/alexgustafsson/systembolaget-api/v3/systembolaget"
 	"github.com/urfave/cli/v2"
 )
 

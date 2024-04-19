@@ -2,29 +2,23 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
+	"os"
 
-	"github.com/alexgustafsson/systembolaget-api/v2/systembolaget"
+	"github.com/alexgustafsson/systembolaget-api/v3/systembolaget"
 	"github.com/urfave/cli/v2"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
-func configureLogging(ctx *cli.Context) (*zap.Logger, error) {
-	var logConfig zap.Config
+func configureLogging(ctx *cli.Context) *slog.Logger {
 	verbose := ctx.Bool("verbose")
 	if verbose {
-		logConfig = zap.NewDevelopmentConfig()
+		return slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	} else {
-		logConfig = zap.NewProductionConfig()
+		return slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	}
-
-	logConfig.EncoderConfig.TimeKey = "time"
-	logConfig.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
-
-	return logConfig.Build()
 }
 
-func getAPIKey(ctx *cli.Context, log *zap.Logger) (string, error) {
+func getAPIKey(ctx *cli.Context, log *slog.Logger) (string, error) {
 	if apiKey := ctx.String("api-key"); apiKey != "" {
 		return apiKey, nil
 	}

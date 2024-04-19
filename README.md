@@ -77,7 +77,7 @@ Add the necessary import.
 
 ```go
 import (
- "github.com/alexgustafsson/systembolaget-api/v2/systembolaget"
+ "github.com/alexgustafsson/systembolaget-api/v3/systembolaget"
 )
 ```
 

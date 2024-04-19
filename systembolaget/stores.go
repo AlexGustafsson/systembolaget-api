@@ -6,10 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
-
-	"go.uber.org/zap"
 )
 
 // Store represents a Systembolaget store.
@@ -49,7 +48,7 @@ func (c *Client) Stores(ctx context.Context) ([]Store, error) {
 		Path:   "/site/V2/Store",
 	}
 
-	log = log.With(zap.String("url", u.String()))
+	log = log.With(slog.String("url", u.String()))
 
 	header := http.Header{}
 	header.Set("Origin", "https://www.systembolaget.se")
@@ -78,7 +77,7 @@ func (c *Client) Stores(ctx context.Context) ([]Store, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		log.Error("Got unexpected status code", zap.Int("statusCode", res.StatusCode), zap.String("status", res.Status))
+		log.Error("Got unexpected status code", slog.Int("statusCode", res.StatusCode), slog.String("status", res.Status))
 
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
@@ -88,7 +87,7 @@ func (c *Client) Stores(ctx context.Context) ([]Store, error) {
 	case "gzip":
 		reader, err = gzip.NewReader(res.Body)
 		if err != nil {
-			log.Error("Failed to create gzip reader", zap.Error(err))
+			log.Error("Failed to create gzip reader", slog.Any("error", err))
 			return nil, err
 		}
 	default:
@@ -99,7 +98,7 @@ func (c *Client) Stores(ctx context.Context) ([]Store, error) {
 	var result []Store
 	decoder := json.NewDecoder(reader)
 	if err := decoder.Decode(&result); err != nil {
-		log.Error("Failed to decode body", zap.Error(err))
+		log.Error("Failed to decode body", slog.Any("error", err))
 		return nil, err
 	}
 
