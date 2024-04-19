@@ -2,83 +2,59 @@ package systembolaget
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"regexp"
-	"strings"
 )
 
-var appSettingsPathRegex = regexp.MustCompile(`"appSettingsFilePath":"([^"]+)"`)
-var appSettingsRegex = regexp.MustCompile(`(?s)Object.freeze\((\{.*\})\)`)
+var apiTokenRegex = regexp.MustCompile(`NEXT_PUBLIC_OCP_APIM_KEY:"([^"]+)"`)
+
+// <script src="https://sb-web-ecommerce-app.azureedge.net/_next/static/chunks/pages/_app-b8fd056cfd040021.js" defer=""></script>
+var appBundlePathRegex = regexp.MustCompile(`<script src="([^"]+app-[^"]+.js)"`)
 
 // GetAPIKey returns the API credentials used by the Systembolaget
 // frontend.
 func GetAPIKey(ctx context.Context) (string, error) {
-	appSettings, err := getAppSettings(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	apiKeyValue, ok := appSettings["ocpApimSubscriptionKey"]
-	if !ok {
-		return "", fmt.Errorf("malformed app settings")
-	}
-	apiKey, ok := apiKeyValue.(string)
-	if !ok {
-		return "", fmt.Errorf("malformed app settings")
-	}
-
-	return apiKey, nil
-}
-
-func getAppSettings(ctx context.Context) (map[string]any, error) {
 	log := GetLogger(ctx)
 
 	log.Debug("Fetching app settings script path")
-	appSettingsScriptPath, err := getAppSettingsScriptPath(ctx)
+	appBundlePath, err := getAppBundlePath(ctx)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	log = slog.With(slog.String("appSettingsScriptPath", appSettingsScriptPath))
+	log = slog.With(slog.String("appBundlePath", appBundlePath))
 
 	log.Debug("Fetching app settings")
-	res, err := http.DefaultClient.Get("https://www.systembolaget.se/" + appSettingsScriptPath)
+	res, err := http.DefaultClient.Get(appBundlePath)
 	if err != nil {
 		log.Error("Request failed", slog.Any("error", err))
-		return nil, err
+		return "", err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		log.Error("Got unexpected status code", slog.Int("statusCode", res.StatusCode), slog.String("status", res.Status))
-		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
+		return "", fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
 	source, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Error("Failed to read body")
-		return nil, err
+		return "", err
 	}
 
-	match := appSettingsRegex.FindSubmatch(source)
+	match := apiTokenRegex.FindSubmatch(source)
 	if match == nil {
-		log.Error("Unable to find script path")
-		return nil, fmt.Errorf("unable to identify appsettings script path")
+		log.Error("Unable to find API token")
+		return "", fmt.Errorf("unable to identify API token")
 	}
 
-	var settings map[string]any
-	if err := json.Unmarshal(match[1], &settings); err != nil {
-		log.Error("Failed to decode body", slog.Any("error", err))
-		return nil, err
-	}
-
-	return settings, nil
+	return string(match[1]), nil
 }
 
-func getAppSettingsScriptPath(ctx context.Context) (string, error) {
+func getAppBundlePath(ctx context.Context) (string, error) {
 	log := GetLogger(ctx)
 
 	log.Debug("Fetching systembolaget.se")
@@ -100,12 +76,11 @@ func getAppSettingsScriptPath(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	match := appSettingsPathRegex.FindSubmatch(source)
+	match := appBundlePathRegex.FindSubmatch(source)
 	if match == nil {
 		slog.Error("Unable to find script path")
 		return "", fmt.Errorf("unable to identify appsettings script path")
 	}
 
-	// The path seems to always be prefixed with "~/"
-	return strings.TrimPrefix(string(match[1]), "~/"), nil
+	return string(match[1]), nil
 }
