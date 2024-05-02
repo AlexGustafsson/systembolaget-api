@@ -185,18 +185,17 @@ func ActionAssortment(ctx *cli.Context) error {
 	}
 
 	out := NewJSONStream(output)
+	defer out.Close()
 
 	log.Debug("Fetching results")
 	fetchedResults := 0
 	for cursor.Next(ctxWithLogging, delayBetweenPages) {
 		if err := cursor.Error(); err != nil {
-			out.Close()
 			log.Error("Failed to fetch next item", slog.Any("error", err))
 			return err
 		}
 
 		if err := out.Write(cursor.At()); err != nil {
-			out.Close()
 			log.Error("Failed to write result", slog.Any("error", err))
 			return err
 		}
@@ -207,7 +206,6 @@ func ActionAssortment(ctx *cli.Context) error {
 		}
 	}
 
-	out.Close()
 	log.Debug("All results have been processed")
 	return nil
 }
