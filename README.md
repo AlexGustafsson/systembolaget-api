@@ -2,10 +2,11 @@
 
 A cross-platform solution for fetching closed and open Systembolaget APIs.
 
-The utility is an easy to use way of fetching Systembolaget's open and closed APIs.
-It's written in Go and is available via several cross-platform builds.
+The utility is an easy to use way of fetching Systembolaget's open and closed
+APIs. It's written in Go and is available via several cross-platform builds.
 
-It's usable both as a library in Go and as a standalone utility for which you can find release builds
+It's usable both as a library in Go and as a standalone utility for which you
+can find release builds
 [here](https://github.com/AlexGustafsson/systembolaget-api-fetch/releases/).
 
 ## Quickstart
@@ -38,7 +39,8 @@ Download the full assortment.
 systembolaget assortment --sort-by "Name" --ascending
 ```
 
-An excerpt from the results is shown below. For samples, see the samples directory.
+An excerpt from the results is shown below. For samples, see the samples
+directory.
 
 ```json
 {
@@ -103,9 +105,11 @@ fmt.Println(res.Products)
 
 ## Use cases
 
-The utility can be used to automatically grab the latest available data from Systembolagt. The data can be used to create
-interesting statistical charts, archives and more. Note however that data derived from the platform should not be used
-in a way that goes against [Systembolaget's mission](https://www.omsystembolaget.se/english/systembolaget-explained/).
+The utility can be used to automatically grab the latest available data from
+Systembolagt. The data can be used to create interesting statistical charts,
+archives and more. Note however that data derived from the platform should not
+be used in a way that goes against
+[Systembolaget's mission](https://www.omsystembolaget.se/english/systembolaget-explained/).
 
 For archived data, please refer to <https://github.com/alexgustafsson/systembolaget-api-data>.
 

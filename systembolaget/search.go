@@ -192,7 +192,8 @@ type SearchOptions struct {
 
 	// SortBy specifies the property to sort by, such as "Name".
 	SortBy SortProperty
-	// SortDirection specifies the direction in which to sort. "Ascending" or "Descending".
+	// SortDirection specifies the direction in which to sort. "Ascending" or
+	// "Descending".
 	SortDirection SortDirection
 }
 
@@ -213,7 +214,8 @@ func FilterByQuery(query string) SearchFilter {
 	}
 }
 
-// FilterByTasteClockBody filters products of a certain body where 0 (minimum) is a thin body and 12 (maximum) is a full body.
+// FilterByTasteClockBody filters products of a certain body where 0 (minimum)
+// is a thin body and 12 (maximum) is a full body.
 func FilterByTasteClockBody(min int, max int) SearchFilter {
 	return func(v *url.Values) {
 		v.Set("tasteClockBody.min", strconv.FormatInt(int64(min), 10))
@@ -221,7 +223,8 @@ func FilterByTasteClockBody(min int, max int) SearchFilter {
 	}
 }
 
-// FilterByTasteClockBitterness filters products of a certain bitterness where 0 (minimum) is not bitter at all and 12 (maximum) is very bitter.
+// FilterByTasteClockBitterness filters products of a certain bitterness where 0
+// (minimum) is not bitter at all and 12 (maximum) is very bitter.
 func FilterByTasteClockBitterness(min int, max int) SearchFilter {
 	return func(v *url.Values) {
 		v.Set("tasteClockBitter.min", strconv.FormatInt(int64(min), 10))
@@ -229,7 +232,8 @@ func FilterByTasteClockBitterness(min int, max int) SearchFilter {
 	}
 }
 
-// FilterByTasteClockSweetness filters products of a certain sweetness where 0 (minimum) is not sweet at all and 12 (maximum) is very sweet.
+// FilterByTasteClockSweetness filters products of a certain sweetness where 0
+// (minimum) is not sweet at all and 12 (maximum) is very sweet.
 func FilterByTasteClockSweetness(min int, max int) SearchFilter {
 	return func(v *url.Values) {
 		v.Set("tasteClockSweetness.min", strconv.FormatInt(int64(min), 10))
@@ -237,7 +241,8 @@ func FilterByTasteClockSweetness(min int, max int) SearchFilter {
 	}
 }
 
-// FilterByTasteClockSmokiness filters products of a certain smokiness where 0 (minimum) is not smoky at all and 12 (maximum) is very smoky.
+// FilterByTasteClockSmokiness filters products of a certain smokiness where 0
+// (minimum) is not smoky at all and 12 (maximum) is very smoky.
 func FilterByTasteClockSmokiness(min int, max int) SearchFilter {
 	return func(v *url.Values) {
 		v.Set("tasteClockSmokiness.min", strconv.FormatInt(int64(min), 10))
@@ -280,7 +285,8 @@ func FilterByGrapes(grapes string) SearchFilter {
 	}
 }
 
-// FilterByMatch filters products that fit with a taste, such as "Aperitif", "Asiatiskt" or "Kött".
+// FilterByMatch filters products that fit with a taste, such as "Aperitif",
+// "Asiatiskt" or "Kött".
 // May be used more than once.
 func FilterByMatch(match string) SearchFilter {
 	return func(v *url.Values) {
@@ -288,7 +294,8 @@ func FilterByMatch(match string) SearchFilter {
 	}
 }
 
-// FilterByAssortment specifies the assortment the product should be included in, such as "Fast sortiment" or "Tillfälligt sortiment".
+// FilterByAssortment specifies the assortment the product should be included
+// in, such as "Fast sortiment" or "Tillfälligt sortiment".
 // May be used more than once.
 func FilterByAssortment(assortment string) SearchFilter {
 	return func(v *url.Values) {
@@ -296,7 +303,8 @@ func FilterByAssortment(assortment string) SearchFilter {
 	}
 }
 
-// FilterBySeal filters products that use a specific seal, such as "A-koppling" or "Champagnekork-natur".
+// FilterBySeal filters products that use a specific seal, such as "A-koppling"
+// or "Champagnekork-natur".
 func FilterBySeal(seal string) SearchFilter {
 	return func(v *url.Values) {
 		v.Add("seal", seal)
@@ -310,7 +318,8 @@ func FilterByVolume(min int, max int) SearchFilter {
 	}
 }
 
-// FilterByPackaging filters products that use a specific packaging, such as "Flaska" + "Glasflaska".
+// FilterByPackaging filters products that use a specific packaging, such as
+// "Flaska" + "Glasflaska".
 // Leave subcategory empty to only filter by category.
 func FilterByPackaging(category string, subcategory string) SearchFilter {
 	return func(v *url.Values) {
@@ -336,9 +345,11 @@ func FilterByOrigin(country string) SearchFilter {
 	}
 }
 
-// FilterByCategory filters products of a specific category, such as "Öl" + "Ljus lager" + "Internationell stil".
+// FilterByCategory filters products of a specific category, such as "Öl" +
+// "Ljus lager" + "Internationell stil".
 // Leave either subcategory empty to only filter by category.
-// Can be used more than once to specify multiple subsubcategories of the same category and subcategory.
+// Can be used more than once to specify multiple subsubcategories of the same
+// category and subcategory.
 func FilterByCategory(category string, subcategory string, subsubcategory string) SearchFilter {
 	return func(v *url.Values) {
 		v.Set("categoryLevel1", category)
@@ -442,7 +453,8 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	return &result, nil
 }
 
-// SearchWithCursor creates a SearchCursor easily loop over any number of results.
+// SearchWithCursor creates a SearchCursor to easily loop over any number of
+// results.
 func (c *Client) SearchWithCursor(options *SearchOptions, filters ...SearchFilter) *SearchCursor {
 	if options == nil {
 		options = &SearchOptions{}

@@ -15,7 +15,8 @@ type Client struct {
 // Option is a Client option.
 type Option func(*Client)
 
-// WithUserAgent specifies a user agent string to include in requests to the API.
+// WithUserAgent specifies a user agent string to include in requests to the
+// API.
 func WithUserAgent(agent string) Option {
 	return func(client *Client) {
 		client.userAgent = agent
