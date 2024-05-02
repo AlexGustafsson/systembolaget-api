@@ -192,24 +192,6 @@ func main() {
 				},
 			},
 		},
-		{
-			Name:   "stores",
-			Usage:  "Fetch stores",
-			Action: ActionStores,
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:    "api-key",
-					Aliases: []string{"k"},
-					Usage:   "API key to use",
-				},
-				&cli.PathFlag{
-					Name:      "output",
-					Aliases:   []string{"o"},
-					Usage:     "Path to output",
-					TakesFile: true,
-				},
-			},
-		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
