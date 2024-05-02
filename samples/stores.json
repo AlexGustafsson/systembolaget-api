@@ -1,0 +1,111 @@
+{
+  "siteId": "0102",
+  "alias": "Fältöversten",
+  "streetAddress": "Karlaplan 13",
+  "displayName": "Fältöversten",
+  "city": "STOCKHOLM",
+  "county": "Stockholms län",
+  "isAgent": false,
+  "isBlocked": false,
+  "blockedText": "",
+  "isOpen": true,
+  "isTastingStore": false,
+  "openingHours": [
+    {
+      "date": "2024-05-02T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-03T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-04T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "15:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-05T00:00:00",
+      "openFrom": "00:00:00",
+      "openTo": "00:00:00",
+      "reason": "-"
+    },
+    {
+      "date": "2024-05-06T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-07T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-08T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-09T00:00:00",
+      "openFrom": "00:00:00",
+      "openTo": "00:00:00",
+      "reason": "Kristi Himmelfärdsdag"
+    },
+    {
+      "date": "2024-05-10T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-11T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "15:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-12T00:00:00",
+      "openFrom": "00:00:00",
+      "openTo": "00:00:00",
+      "reason": "-"
+    },
+    {
+      "date": "2024-05-13T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-14T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-15T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-16T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    },
+    {
+      "date": "2024-05-17T00:00:00",
+      "openFrom": "10:00:00",
+      "openTo": "19:00:00",
+      "reason": ""
+    }
+  ]
+}

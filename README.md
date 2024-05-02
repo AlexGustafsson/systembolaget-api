@@ -39,6 +39,12 @@ Download the full assortment.
 systembolaget assortment --sort-by "Name" --ascending
 ```
 
+Fetch all stores.
+
+```shell
+systembolaget stores
+```
+
 An excerpt from the results is shown below. For samples, see the samples
 directory.
 

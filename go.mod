@@ -1,4 +1,4 @@
-module github.com/alexgustafsson/systembolaget-api/v3
+module github.com/alexgustafsson/systembolaget-api/v4
 
 go 1.22
 

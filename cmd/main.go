@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alexgustafsson/systembolaget-api/v3/systembolaget"
+	"github.com/alexgustafsson/systembolaget-api/v4/systembolaget"
 	"github.com/urfave/cli/v2"
 )
 
@@ -189,6 +189,24 @@ func main() {
 				},
 				&cli.StringSliceFlag{
 					Name: "subsubcategory",
+				},
+			},
+		},
+		{
+			Name:   "stores",
+			Usage:  "Fetch stores",
+			Action: ActionStores,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "api-key",
+					Aliases: []string{"k"},
+					Usage:   "API key to use. Defaults to automatically fetching one",
+				},
+				&cli.PathFlag{
+					Name:      "output",
+					Aliases:   []string{"o"},
+					Usage:     "Path to output",
+					TakesFile: true,
 				},
 			},
 		},
