@@ -105,7 +105,12 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 	// The first page is fetched immediately
 	if c.currentPage != nil {
 		log.Debug("Waiting")
-		<-time.After(delayBetweenPages)
+		select {
+		case <-time.After(delayBetweenPages):
+		case <-ctx.Done():
+			c.currentError = ctx.Err()
+			return false
+		}
 	}
 	c.currentError = c.nextPage(ctx, log)
 	if c.currentError != nil {

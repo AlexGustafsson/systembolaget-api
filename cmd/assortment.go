@@ -2,10 +2,12 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/alexgustafsson/systembolaget-api/v3/systembolaget"
@@ -49,7 +51,6 @@ func (s *JSONStream) Close() error {
 
 func ActionAssortment(ctx *cli.Context) error {
 	log := configureLogging(ctx)
-	ctxWithLogging := systembolaget.SetLogger(ctx.Context, log)
 
 	apiKey, err := getAPIKey(ctx, log)
 	if err != nil {
@@ -184,12 +185,30 @@ func ActionAssortment(ctx *cli.Context) error {
 		output = file
 	}
 
+	runCtx, cancel := context.WithCancel(ctx.Context)
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	caught := 0
+	go func() {
+		for range signals {
+			caught++
+			if caught == 1 {
+				slog.Info("Caught signal, exiting gracefully")
+				cancel()
+			} else {
+				slog.Info("Caught signal, exiting now")
+				os.Exit(1)
+			}
+		}
+	}()
+
 	out := NewJSONStream(output)
 	defer out.Close()
 
 	log.Debug("Fetching results")
 	fetchedResults := 0
-	for cursor.Next(ctxWithLogging, delayBetweenPages) {
+	for cursor.Next(systembolaget.SetLogger(runCtx, log), delayBetweenPages) {
 		if err := cursor.Error(); err != nil {
 			log.Error("Failed to fetch next item", slog.Any("error", err))
 			return err
