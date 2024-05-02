@@ -22,14 +22,15 @@ type Range struct {
 // SearchResult contains the raw result of a query.
 type SearchResult struct {
 	Metadata struct {
-		DocumentCount                int   `json:"docCount"`
-		FullAssortmentDocumentCount  int   `json:"fullAssortmentDocCount"`
-		NextPage                     int   `json:"nextPage"`
-		PriceRange                   Range `json:"priceRange"`
-		VolumeRange                  Range `json:"volumeRange"`
-		AlcoholPercentageRange       Range `json:"alcoholPercantageRange"`
-		SugarContentRange            Range `json:"sugarContentRange"`
-		SugarContentGramsPer100Range Range `json:"sugarContentGramPer100mlRange"`
+		DocumentCount                int    `json:"docCount"`
+		FullAssortmentDocumentCount  int    `json:"fullAssortmentDocCount"`
+		NextPage                     int    `json:"nextPage"`
+		PriceRange                   Range  `json:"priceRange"`
+		VolumeRange                  Range  `json:"volumeRange"`
+		AlcoholPercentageRange       Range  `json:"alcoholPercantageRange"`
+		SugarContentRange            Range  `json:"sugarContentRange"`
+		SugarContentGramsPer100Range Range  `json:"sugarContentGramPer100mlRange"`
+		DidYouMeanQuery              string `json:"didYouMeanQuery"`
 	} `json:"metadata"`
 	Products []Product `json:"products"`
 	Filters  []Filter  `json:"filters"`
@@ -52,6 +53,7 @@ type Filter struct {
 	IsMultipleChoice      bool   `json:"isMultipleChoice"`
 	IsActive              bool   `json:"isActive"`
 	IsSubtitleTextVisible bool   `json:"isSubtitleTextVisible"`
+	IsExpanded            bool   `json:"isExpanded"`
 	SearchModifiers       []SearchModifier
 	Child                 *Filter `json:"child"`
 }
