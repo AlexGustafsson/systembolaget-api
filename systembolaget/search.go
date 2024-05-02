@@ -118,7 +118,7 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 // hasNextPage returns whether or not the cursor has a next page.
 func (c *SearchCursor) hasNextPage() bool {
 	// currentPage is nil if no page has been fetched
-	// nextPage is only set if there is a new page to fetch
+	// nextPage in the metadata is -1 if there are no more pages
 	return c.currentPage == nil || c.currentPage.Metadata.NextPage > 0
 }
 
