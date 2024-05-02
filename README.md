@@ -9,7 +9,6 @@ It's usable both as a library in Go and as a standalone utility for which you ca
 [here](https://github.com/AlexGustafsson/systembolaget-api-fetch/releases/).
 
 ## Quickstart
-<a name="quickstart"></a>
 
 ### Using as a utility
 
@@ -99,11 +98,10 @@ fmt.Println(res.Products)
 ## Table of contents
 
 [Quickstart](#quickstart)<br/>
-[Use cases](#usecases)<br/>
+[Use cases](#use-cases)<br/>
 [Contributing](#contributing)
 
 ## Use cases
-<a name="usecases"></a>
 
 The utility can be used to automatically grab the latest available data from Systembolagt. The data can be used to create
 interesting statistical charts, archives and more. Note however that data derived from the platform should not be used
@@ -112,7 +110,6 @@ in a way that goes against [Systembolaget's mission](https://www.omsystembolaget
 For archived data, please refer to <https://github.com/alexgustafsson/systembolaget-api-data>.
 
 ## Contributing
-<a name="contributing"></a>
 
 Any help with the project is more than welcome.
 
