@@ -152,6 +152,11 @@ func (c *SearchCursor) At() Product {
 	return c.currentPage.Products[c.index]
 }
 
+// CurrentPage returns the current page (if any).
+func (c *SearchCursor) CurrentPage() *SearchResult {
+	return c.currentPage
+}
+
 // Error returns the latest error, if any. Populated when pages are fetched.
 func (c *SearchCursor) Error() error {
 	return c.currentError

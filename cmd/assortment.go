@@ -209,11 +209,6 @@ func ActionAssortment(ctx *cli.Context) error {
 	log.Debug("Fetching results")
 	fetchedResults := 0
 	for cursor.Next(systembolaget.SetLogger(runCtx, log), delayBetweenPages) {
-		if err := cursor.Error(); err != nil {
-			log.Error("Failed to fetch next item", slog.Any("error", err))
-			return err
-		}
-
 		if err := out.Write(cursor.At()); err != nil {
 			log.Error("Failed to write result", slog.Any("error", err))
 			return err
@@ -225,6 +220,16 @@ func ActionAssortment(ctx *cli.Context) error {
 		}
 	}
 
-	log.Debug("All results have been processed")
+	totalResults := -1
+	if currentPage := cursor.CurrentPage(); currentPage != nil {
+		totalResults = currentPage.Metadata.FullAssortmentDocumentCount
+	}
+
+	if err := cursor.Error(); err != nil {
+		log.Error("Failed to fetch next item", slog.Any("error", err), slog.Int("results", fetchedResults), slog.Int("resultsLimit", limit), slog.Int("totalResults", totalResults))
+		return err
+	}
+
+	log.Debug("All results have been processed", slog.Int("results", fetchedResults), slog.Int("resultsLimit", limit), slog.Int("totalResults", totalResults))
 	return nil
 }

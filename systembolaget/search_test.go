@@ -17,10 +17,6 @@ func TestSearchWithCursor(t *testing.T) {
 
 	cursor := client.SearchWithCursor(nil, FilterByCategory("Alkoholfritt", "Öl", ""))
 
-	results, err := client.Search(context.TODO(), nil, FilterByCategory("Alkoholfritt", "Öl", ""))
-	require.NoError(t, err)
-	totalItems := results.Metadata.FullAssortmentDocumentCount
-
 	yieldedItems := 0
 	for cursor.Next(context.TODO(), 0) {
 		require.NoError(t, cursor.Error())
@@ -34,7 +30,7 @@ func TestSearchWithCursor(t *testing.T) {
 	}
 
 	// Ensure that we retrieved all products
-	assert.Equal(t, totalItems, yieldedItems)
+	assert.Equal(t, cursor.CurrentPage().Metadata.FullAssortmentDocumentCount, yieldedItems)
 	// Ensure that there were multiple pages processed
 	assert.Greater(t, yieldedItems, 30)
 }
