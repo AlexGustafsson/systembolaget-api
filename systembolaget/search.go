@@ -204,6 +204,7 @@ type SearchFilter func(*url.Values)
 func FilterByStore(store string) SearchFilter {
 	return func(v *url.Values) {
 		v.Set("storeId", store)
+		v.Set("isInStoreAssortmentSearch", "true")
 	}
 }
 
