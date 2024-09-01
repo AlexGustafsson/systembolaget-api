@@ -210,6 +210,34 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:   "stock",
+			Usage:  "Fetch stock balance for a specific product in a store",
+			Action: ActionStock,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "api-key",
+					Aliases: []string{"k"},
+					Usage:   "API key to use. Defaults to automatically fetching one",
+				},
+				&cli.StringFlag{
+					Name:     "store-id",
+					Usage:    "The ID of the store",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     "product-number",
+					Usage:    "The product number",
+					Required: true,
+				},
+				&cli.PathFlag{
+					Name:      "output",
+					Aliases:   []string{"o"},
+					Usage:     "Path to output",
+					TakesFile: true,
+				},
+			},
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
