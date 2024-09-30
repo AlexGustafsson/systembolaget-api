@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-var apiTokenRegex = regexp.MustCompile(`NEXT_PUBLIC_OCP_APIM_KEY:"([^"]+)"`)
+var apiTokenRegex = regexp.MustCompile(`NEXT_PUBLIC_API_KEY_APIM:"([^"]+)"`)
 
 // <script src="https://sb-web-ecommerce-app.azureedge.net/_next/static/chunks/pages/_app-b8fd056cfd040021.js" defer=""></script>
 var appBundlePathRegex = regexp.MustCompile(`<script src="([^"]+app-[^"]+.js)"`)
