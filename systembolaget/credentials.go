@@ -7,12 +7,13 @@ import (
 	"log/slog"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 var apiTokenRegex = regexp.MustCompile(`NEXT_PUBLIC_API_KEY_APIM:"([^"]+)"`)
 
-// <script src="https://sb-web-ecommerce-app.azureedge.net/_next/static/chunks/pages/_app-b8fd056cfd040021.js" defer=""></script>
-var appBundlePathRegex = regexp.MustCompile(`<script src="([^"]+app-[^"]+.js)"`)
+// <script src="/_next/static/chunks/pages/_app-002c25371b87ca96.js" defer=""></script>
+var appBundlePathRegex = regexp.MustCompile(`<script src="([^"]+_app-[^"]+.js)"`)
 
 // GetAPIKey returns the API credentials used by the Systembolaget
 // frontend.
@@ -23,6 +24,10 @@ func GetAPIKey(ctx context.Context) (string, error) {
 	appBundlePath, err := getAppBundlePath(ctx)
 	if err != nil {
 		return "", err
+	}
+
+	if strings.HasPrefix(appBundlePath, "/") {
+		appBundlePath = "https://www.systembolaget.se" + appBundlePath
 	}
 	log = slog.With(slog.String("appBundlePath", appBundlePath))
 
