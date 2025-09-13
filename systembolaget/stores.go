@@ -38,16 +38,25 @@ type StoreOpeningHours struct {
 
 // Stores fetches available stores.
 func (c *Client) Stores(ctx context.Context) ([]Store, error) {
+	return c.SearchStores(ctx, "", true)
+}
+
+// SearchStores searches for available stores.
+// Query typically matches both name and location.
+func (c *Client) SearchStores(ctx context.Context, query string, includePredictions bool) ([]Store, error) {
 	log := GetLogger(ctx)
 
-	query := url.Values{}
-	query.Set("includePredictions", "false")
+	queryParams := url.Values{}
+	queryParams.Set("includePredictions", strconv.FormatBool(includePredictions))
+	if query != "" {
+		queryParams.Set("q", query)
+	}
 
 	u := &url.URL{
 		Scheme:   "https",
 		Host:     "api-extern.systembolaget.se",
 		Path:     "/sb-api-ecommerce/v1/sitesearch/site",
-		RawQuery: query.Encode(),
+		RawQuery: queryParams.Encode(),
 	}
 
 	log = log.With(slog.String("url", u.String()))
