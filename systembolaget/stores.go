@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 // Store represents a Systembolaget store.
@@ -21,12 +22,14 @@ type Store struct {
 	County        string `json:"county"`
 	// NOTE: always null, exclude for now
 	// PostalCode
-	IsAgent        bool                `json:"isAgent"`
-	IsBlocked      bool                `json:"isBlocked"`
-	BlockedText    string              `json:"blockedText"`
-	IsOpen         bool                `json:"isOpen"`
-	IsTastingStore bool                `json:"isTastingStore"`
-	OpeningHours   []StoreOpeningHours `json:"openingHours"`
+	IsAgent           bool                `json:"isAgent"`
+	IsBlocked         bool                `json:"isBlocked"`
+	BlockedText       string              `json:"blockedText"`
+	IsSvanenCertified bool                `json:"isSvanenCertified"`
+	IsOpen            bool                `json:"isOpen"`
+	IsTastingStore    bool                `json:"isTastingStore"`
+	OpeningHours      []StoreOpeningHours `json:"openingHours"`
+	Position          *StorePosition      `json:"position"`
 }
 
 type StoreOpeningHours struct {
@@ -34,6 +37,11 @@ type StoreOpeningHours struct {
 	OpenFrom string `json:"openFrom"`
 	OpenTo   string `json:"openTo"`
 	Reason   string `json:"reason"`
+}
+
+type StorePosition struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 // Stores fetches available stores.
