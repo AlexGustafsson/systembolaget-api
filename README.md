@@ -54,7 +54,7 @@ systembolaget stores --search majorna
 An excerpt from the results is shown below. For samples, see the samples
 directory.
 
-```json
+```jsonc
 {
   "productNameBold": "Melleruds",
   "productNameThin": "Utmärkta Pilsner",
