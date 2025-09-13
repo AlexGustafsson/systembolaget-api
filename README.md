@@ -36,7 +36,7 @@ systembolaget assortment --alcohol-percentage 0,0 --packaging-category Flaska --
 Download the full assortment.
 
 ```shell
-systembolaget assortment --sort-by "Name" --ascending
+systembolaget assortment --sort-by "Name" --sort ascending
 ```
 
 Fetch all stores.
