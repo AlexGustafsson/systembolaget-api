@@ -1,11 +1,9 @@
 package systembolaget
 
 import (
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -404,7 +402,6 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	header.Set("Access-Control-Allow-Origin", "*")
 	header.Set("Pragma", "no-cache")
 	header.Set("Accept", "application/json")
-	header.Set("Accept-Encoding", "gzip")
 	header.Set("Cache-Control", "no-cache")
 	header.Set("Ocp-Apim-Subscription-Key", c.apiKey)
 
@@ -430,21 +427,8 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
-	var reader io.ReadCloser
-	switch res.Header.Get("Content-Encoding") {
-	case "gzip":
-		reader, err = gzip.NewReader(res.Body)
-		if err != nil {
-			log.Error("Failed to create gzip reader", slog.Any("error", err))
-			return nil, err
-		}
-	default:
-		reader = res.Body
-	}
-	defer reader.Close()
-
 	var result SearchResult
-	decoder := json.NewDecoder(reader)
+	decoder := json.NewDecoder(res.Body)
 	if err := decoder.Decode(&result); err != nil {
 		log.Error("Failed to decode body", slog.Any("error", err))
 		return nil, err
