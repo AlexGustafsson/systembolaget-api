@@ -45,6 +45,12 @@ Fetch all stores.
 systembolaget stores
 ```
 
+Search for a store.
+
+```shell
+systembolaget stores --search majorna
+```
+
 An excerpt from the results is shown below. For samples, see the samples
 directory.
 
