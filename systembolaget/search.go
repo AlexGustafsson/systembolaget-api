@@ -20,9 +20,14 @@ type Range struct {
 // SearchResult contains the raw result of a query.
 type SearchResult struct {
 	Metadata struct {
-		DocumentCount                int    `json:"docCount"`
-		FullAssortmentDocumentCount  int    `json:"fullAssortmentDocCount"`
+		DocumentCount               int `json:"docCount"`
+		FullAssortmentDocumentCount int `json:"fullAssortmentDocCount"`
+		// PreviousPage is -1 if there are no more pages.
+		PreviousPage int `json:"previousPage"`
+		// NextPage is -1 if there are no more pages. It can be a lower value than
+		// the requested page if the requested page is out of bounds.
 		NextPage                     int    `json:"nextPage"`
+		TotalPages                   int    `json:"totalPages"`
 		PriceRange                   Range  `json:"priceRange"`
 		VolumeRange                  Range  `json:"volumeRange"`
 		AlcoholPercentageRange       Range  `json:"alcoholPercantageRange"`
