@@ -368,7 +368,7 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	if options.PageSize == 0 {
 		options.PageSize = 30
 	}
-	if options.Page == 0 {
+	if options.Page < 1 {
 		options.Page = 1
 	}
 
