@@ -187,10 +187,13 @@ const (
 // SearchOptions contains optional search options.
 type SearchOptions struct {
 	// PageSize is the size of pages returned by the server.
-	// Note that there's an upper limit of 30 results enforced by the server.
+	// NOTE: The server enforces an upper limit of 30.
 	// Defaults to 30.
 	PageSize int
 	// Page is the page of results to return. Defaults to 1.
+	// NOTE: Starts at 1.
+	// NOTE: The API seems to limit the number of pages to 333.
+	// SEE: https://github.com/AlexGustafsson/systembolaget-api/issues/9
 	Page int
 
 	// SortBy specifies the property to sort by, such as "Name".
@@ -455,6 +458,5 @@ func (c *Client) SearchWithCursor(options *SearchOptions, filters ...SearchFilte
 		filters: filters,
 		index:   -1,
 	}
-	cursor.options.Page = 0
 	return cursor
 }
