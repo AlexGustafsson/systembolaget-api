@@ -1,11 +1,9 @@
 package systembolaget
 
 import (
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -22,9 +20,14 @@ type Range struct {
 // SearchResult contains the raw result of a query.
 type SearchResult struct {
 	Metadata struct {
-		DocumentCount                int    `json:"docCount"`
-		FullAssortmentDocumentCount  int    `json:"fullAssortmentDocCount"`
+		DocumentCount               int `json:"docCount"`
+		FullAssortmentDocumentCount int `json:"fullAssortmentDocCount"`
+		// PreviousPage is -1 if there are no more pages.
+		PreviousPage int `json:"previousPage"`
+		// NextPage is -1 if there are no more pages. It can be a lower value than
+		// the requested page if the requested page is out of bounds.
 		NextPage                     int    `json:"nextPage"`
+		TotalPages                   int    `json:"totalPages"`
 		PriceRange                   Range  `json:"priceRange"`
 		VolumeRange                  Range  `json:"volumeRange"`
 		AlcoholPercentageRange       Range  `json:"alcoholPercantageRange"`
@@ -184,10 +187,13 @@ const (
 // SearchOptions contains optional search options.
 type SearchOptions struct {
 	// PageSize is the size of pages returned by the server.
-	// Note that there's an upper limit of 30 results enforced by the server.
+	// NOTE: The server enforces an upper limit of 30.
 	// Defaults to 30.
 	PageSize int
 	// Page is the page of results to return. Defaults to 1.
+	// NOTE: Starts at 1.
+	// NOTE: The API seems to limit the number of pages to 333.
+	// SEE: https://github.com/AlexGustafsson/systembolaget-api/issues/9
 	Page int
 
 	// SortBy specifies the property to sort by, such as "Name".
@@ -370,7 +376,7 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	if options.PageSize == 0 {
 		options.PageSize = 30
 	}
-	if options.Page == 0 {
+	if options.Page < 1 {
 		options.Page = 1
 	}
 
@@ -404,7 +410,6 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 	header.Set("Access-Control-Allow-Origin", "*")
 	header.Set("Pragma", "no-cache")
 	header.Set("Accept", "application/json")
-	header.Set("Accept-Encoding", "gzip")
 	header.Set("Cache-Control", "no-cache")
 	header.Set("Ocp-Apim-Subscription-Key", c.apiKey)
 
@@ -430,21 +435,8 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
-	var reader io.ReadCloser
-	switch res.Header.Get("Content-Encoding") {
-	case "gzip":
-		reader, err = gzip.NewReader(res.Body)
-		if err != nil {
-			log.Error("Failed to create gzip reader", slog.Any("error", err))
-			return nil, err
-		}
-	default:
-		reader = res.Body
-	}
-	defer reader.Close()
-
 	var result SearchResult
-	decoder := json.NewDecoder(reader)
+	decoder := json.NewDecoder(res.Body)
 	if err := decoder.Decode(&result); err != nil {
 		log.Error("Failed to decode body", slog.Any("error", err))
 		return nil, err
@@ -466,6 +458,5 @@ func (c *Client) SearchWithCursor(options *SearchOptions, filters ...SearchFilte
 		filters: filters,
 		index:   -1,
 	}
-	cursor.options.Page = 0
 	return cursor
 }

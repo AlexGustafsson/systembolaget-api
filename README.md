@@ -36,7 +36,7 @@ systembolaget assortment --alcohol-percentage 0,0 --packaging-category Flaska --
 Download the full assortment.
 
 ```shell
-systembolaget assortment --sort-by "Name" --ascending
+systembolaget assortment --sort-by "Name" --sort ascending
 ```
 
 Fetch all stores.
@@ -45,10 +45,16 @@ Fetch all stores.
 systembolaget stores
 ```
 
+Search for a store.
+
+```shell
+systembolaget stores --search majorna
+```
+
 An excerpt from the results is shown below. For samples, see the samples
 directory.
 
-```json
+```jsonc
 {
   "productNameBold": "Melleruds",
   "productNameThin": "Utmärkta Pilsner",

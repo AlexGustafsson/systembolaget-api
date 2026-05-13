@@ -208,6 +208,11 @@ func main() {
 					Usage:     "Path to output",
 					TakesFile: true,
 				},
+				&cli.StringFlag{
+					Name:    "search",
+					Aliases: []string{"q"},
+					Usage:   "Optional search query",
+				},
 			},
 		},
 	}

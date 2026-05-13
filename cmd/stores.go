@@ -53,7 +53,7 @@ func ActionStores(ctx *cli.Context) error {
 		}
 	}()
 
-	stores, err := client.Stores(systembolaget.SetLogger(runCtx, log))
+	stores, err := client.SearchStores(systembolaget.SetLogger(runCtx, log), ctx.String("search"), ctx.String("search") == "")
 	if err != nil {
 		return err
 	}
