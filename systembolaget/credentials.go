@@ -12,79 +12,89 @@ import (
 
 var apiTokenRegex = regexp.MustCompile(`NEXT_PUBLIC_API_KEY_APIM:"([^"]+)"`)
 
-// <script src="/_next/static/chunks/pages/_app-002c25371b87ca96.js" defer=""></script>
-var appBundlePathRegex = regexp.MustCompile(`<script src="([^"]+_app-[^"]+.js)"`)
+// <script src="/_next/static/chunks/131pjojsj1pi9.js" defer=""></script>
+var chunkPathRegex = regexp.MustCompile(`src="(/_next/static/chunks/[^"]+\.js)"`)
 
 // GetAPIKey returns the API credentials used by the Systembolaget
 // frontend.
 func GetAPIKey(ctx context.Context) (string, error) {
-	log := GetLogger(ctx)
-
-	log.Debug("Fetching app settings script path")
-	appBundlePath, err := getAppBundlePath(ctx)
+	chunkPaths, err := getChunkPaths(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	if strings.HasPrefix(appBundlePath, "/") {
-		appBundlePath = "https://www.systembolaget.se" + appBundlePath
-	}
-	log = slog.With(slog.String("appBundlePath", appBundlePath))
-
-	log.Debug("Fetching app settings")
-	res, err := http.DefaultClient.Get(appBundlePath)
-	if err != nil {
-		log.Error("Request failed", slog.Any("error", err))
-		return "", err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		log.Error("Got unexpected status code", slog.Int("statusCode", res.StatusCode), slog.String("status", res.Status))
-		return "", fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
+	for _, chunkPath := range chunkPaths {
+		key, err := extractAPIKey(ctx, chunkPath)
+		if err == nil {
+			return key, nil
+		}
 	}
 
-	source, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Error("Failed to read body")
-		return "", err
-	}
-
-	match := apiTokenRegex.FindSubmatch(source)
-	if match == nil {
-		log.Error("Unable to find API token")
-		return "", fmt.Errorf("unable to identify API token")
-	}
-
-	return string(match[1]), nil
+	return "", fmt.Errorf("unable to identify API token in any script chunk")
 }
 
-func getAppBundlePath(ctx context.Context) (string, error) {
+func getChunkPaths(ctx context.Context) ([]string, error) {
 	log := GetLogger(ctx)
 
 	log.Debug("Fetching systembolaget.se")
 	res, err := http.DefaultClient.Get("https://www.systembolaget.se")
 	if err != nil {
 		slog.Error("Request failed", slog.Any("error", err))
-		return "", err
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		slog.Error("Got unexpected status code", slog.Int("statusCode", res.StatusCode), slog.String("status", res.Status))
-		return "", fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
 	source, err := io.ReadAll(res.Body)
 	if err != nil {
 		slog.Error("Failed to read body")
+		return nil, err
+	}
+
+	matches := chunkPathRegex.FindAllSubmatch(source, -1)
+	if len(matches) == 0 {
+		slog.Error("Unable to find script chunks")
+		return nil, fmt.Errorf("unable to identify script chunks")
+	}
+
+	paths := make([]string, 0, len(matches))
+	for _, match := range matches {
+		path := string(match[1])
+		if strings.HasPrefix(path, "/") {
+			path = "https://www.systembolaget.se" + path
+		}
+		paths = append(paths, path)
+	}
+
+	return paths, nil
+}
+
+func extractAPIKey(ctx context.Context, url string) (string, error) {
+	log := GetLogger(ctx)
+
+	log.Debug("Fetching chunk", slog.String("url", url))
+	res, err := http.DefaultClient.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
+	}
+
+	source, err := io.ReadAll(res.Body)
+	if err != nil {
 		return "", err
 	}
 
-	match := appBundlePathRegex.FindSubmatch(source)
+	match := apiTokenRegex.FindSubmatch(source)
 	if match == nil {
-		slog.Error("Unable to find script path")
-		return "", fmt.Errorf("unable to identify appsettings script path")
+		return "", fmt.Errorf("API token not found in chunk")
 	}
 
 	return string(match[1]), nil
