@@ -94,7 +94,7 @@ func extractAPIKey(ctx context.Context, url string) (string, error) {
 
 	match := apiTokenRegex.FindSubmatch(source)
 	if match == nil {
-		return "", fmt.Errorf("API token not found in chunk")
+		return "", fmt.Errorf("api token not found in chunk")
 	}
 
 	return string(match[1]), nil
