@@ -9,7 +9,7 @@ import (
 )
 
 func ActionStores(ctx context.Context, cmd *cli.Command) error {
-	log := configureLogging(cmd)
+	log := getLogger(cmd)
 
 	client, err := getClient(ctx, cmd, log)
 	if err != nil {

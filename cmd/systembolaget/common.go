@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func configureLogging(cmd *cli.Command) *slog.Logger {
+func getLogger(cmd *cli.Command) *slog.Logger {
 	verbose := cmd.Bool("verbose")
 	if verbose {
 		return slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
