@@ -2,6 +2,7 @@ package systembolaget
 
 import (
 	"context"
+	"flag"
 	"net/http"
 	"os"
 	"testing"
@@ -15,6 +16,7 @@ import (
 var testClient *AuthenticatedClient
 
 func TestMain(m *testing.M) {
+	flag.Parse()
 	if !testing.Short() {
 		apiKey := os.Getenv("API_KEY")
 		if apiKey == "" {
