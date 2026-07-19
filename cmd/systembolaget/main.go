@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/alexgustafsson/systembolaget-api/v4/systembolaget"
+	"github.com/alexgustafsson/systembolaget-api/v5/systembolaget"
 	"github.com/urfave/cli/v3"
 )
 
