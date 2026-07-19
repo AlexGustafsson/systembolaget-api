@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - cmd/**
+      - systembolaget/**
+      - go.*
+      - .github/workflows/build.yaml
+  push:
+    branches:
+      - main
+    paths:
+      - cmd/**
+      - systembolaget/**
+      - go.*
+      - .github/workflows/build.yaml
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Run tests
+        env:
+          # Use the toolchain specified in go.mod, or newer
+          GOTOOLCHAIN: auto
+        run: go test -v -short ./...
+
+  build:
+    name: Build cli
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Build cli
+        run: go build cmd/systembolaget/*.go
