@@ -24,13 +24,13 @@ systembolaget assortment --category "Öl" --origin "Sverige" --sort-by "ProductL
 Get the names of Sake with a sweetness of between 5 and 12.
 
 ```shell
-systembolaget assortment --taste-clock-sweetness 5,12 --category Vin --subcategory Sake | jq -cr '.[].productNameBold'
+systembolaget assortment --taste-clock-sweetness 5-12 --category Vin --subcategory Sake | jq -cr '.[].productNameBold'
 ```
 
 Get the names of non-alcoholic beverages in glass bottles.
 
 ```shell
-systembolaget assortment --alcohol-percentage 0,0 --packaging-category Flaska --limit 5 | jq -cr '.[].productNameBold'
+systembolaget assortment --alcohol-percentage 0-0 --packaging-category Flaska --limit 5 | jq -cr '.[].productNameBold'
 ```
 
 Download the full assortment.
@@ -55,7 +55,7 @@ Get a product's status in a particular store.
 
 ```shell
 # Look up the status of Guinness in the Fältöversten, Stockholm store
-systembolaget stock 0102 507849
+systembolaget stock --store-id 0102 --product-id 507849
 ```
 
 An excerpt from the results is shown below. For samples, see the samples
@@ -95,17 +95,17 @@ import (
 )
 ```
 
-Create a client.
+Create an authenticated client.
 
 ```go
-client := systembolaget.NewClient(apiKey)
+client, _ := systembolaget.DefaultClient.GetAuthenticatedClient(context.TODO())
 ```
 
 Perform a search for a light lager that goes with meat.
 
 ```go
 res, _ := client.Search(
- ctx.TODO(),
+ context.TODO(),
  &systembolaget.SearchOptions{
   SortBy:        systembolaget.SortPropertyScore,
   SortDirection: systembolaget.SortDirectionDescending,

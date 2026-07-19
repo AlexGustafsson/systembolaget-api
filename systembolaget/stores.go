@@ -62,7 +62,7 @@ func (c *AuthenticatedClient) SearchStores(ctx context.Context, query string, in
 		RawQuery: queryParams.Encode(),
 	}
 
-	header := http.Header{}
+	header := make(http.Header)
 	header.Set("Origin", "https://www.systembolaget.se")
 	header.Set("Access-Control-Allow-Origin", "*")
 	header.Set("Pragma", "no-cache")

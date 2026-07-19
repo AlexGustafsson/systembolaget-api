@@ -16,6 +16,7 @@ type StockStatus struct {
 	IsInStoreAssortment bool   `json:"isInStoreAssortment"`
 }
 
+// GetStockStatus fetches the stock status of a product in a specific store.
 func (c *AuthenticatedClient) GetStockStatus(ctx context.Context, storeID string, productID string) (*StockStatus, error) {
 	u := &url.URL{
 		Scheme: "https",
@@ -23,7 +24,7 @@ func (c *AuthenticatedClient) GetStockStatus(ctx context.Context, storeID string
 		Path:   fmt.Sprintf("/sb-api-ecommerce/v1/stockbalance/store/%s/%s/", storeID, productID),
 	}
 
-	header := http.Header{}
+	header := make(http.Header)
 	header.Set("Origin", "https://www.systembolaget.se")
 	header.Set("Pragma", "no-cache")
 	header.Set("Accept", "application/json")
