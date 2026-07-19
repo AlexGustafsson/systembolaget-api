@@ -215,6 +215,12 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:      "stock",
+			Usage:     "Get current stock",
+			Action:    ActionStock,
+			ArgsUsage: "<store id> <product id>",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {

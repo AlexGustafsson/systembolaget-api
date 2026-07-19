@@ -51,6 +51,13 @@ Search for a store.
 systembolaget stores --search majorna
 ```
 
+Get a product's status in a particular store.
+
+```shell
+# Look up the status of Guinness in the Fältöversten, Stockholm store
+systembolaget stock 0102 507849
+```
+
 An excerpt from the results is shown below. For samples, see the samples
 directory.
 
