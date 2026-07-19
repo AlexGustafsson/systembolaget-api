@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"log/slog"
 	"os"
 	"time"
@@ -133,27 +132,12 @@ func ActionAssortment(ctx context.Context, cmd *cli.Command) error {
 	log.Debug("Retrieving cursor")
 	cursor := client.SearchWithCursor(options, filters...)
 
-	var output io.Writer
-	if cmd.String("output") == "" {
-		output = os.Stdout
-	} else {
-		file, err := os.OpenFile(cmd.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Error("Failed to open output file", slog.Any("error", err))
-			return err
-		}
-		defer file.Close()
-		output = file
-	}
-
-	json.NewEncoder(output)
-	out := NewJSONStream(output)
-	defer out.Close()
+	encoder := json.NewEncoder(os.Stdout)
 
 	log.Debug("Fetching results")
 	fetchedResults := 0
 	for cursor.Next(ctx, delayBetweenPages) {
-		if err := out.Write(cursor.At()); err != nil {
+		if err := encoder.Encode(cursor.At()); err != nil {
 			log.Error("Failed to write result", slog.Any("error", err))
 			return err
 		}

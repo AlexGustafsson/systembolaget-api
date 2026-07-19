@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"io"
-	"log/slog"
 	"os"
 
 	"github.com/urfave/cli/v3"
@@ -18,25 +16,17 @@ func ActionStores(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	var output io.Writer
-	if cmd.String("output") == "" {
-		output = os.Stdout
-	} else {
-		file, err := os.OpenFile(cmd.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Error("Failed to open output file", slog.Any("error", err))
-			return err
-		}
-		defer file.Close()
-		output = file
-	}
-
 	stores, err := client.SearchStores(ctx, cmd.String("search"), cmd.String("search") == "")
 	if err != nil {
 		return err
 	}
 
-	encoder := json.NewEncoder(output)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(stores)
+	encoder := json.NewEncoder(os.Stdout)
+	for _, store := range stores {
+		err := encoder.Encode(store)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

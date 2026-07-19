@@ -1,11 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -38,39 +35,4 @@ func getClient(ctx context.Context, cmd *cli.Command, log *slog.Logger) (*system
 	}
 
 	return client, nil
-}
-
-type JSONStream struct {
-	out      io.Writer
-	previous bool
-}
-
-func NewJSONStream(out io.Writer) *JSONStream {
-	out.Write([]byte("[\n  "))
-	return &JSONStream{
-		out:      out,
-		previous: false,
-	}
-}
-
-func (s *JSONStream) Write(v any) error {
-	if s.previous {
-		if _, err := s.out.Write([]byte(",\n  ")); err != nil {
-			return err
-		}
-	}
-
-	buffer, err := json.MarshalIndent(v, "  ", "  ")
-	if err != nil {
-		return err
-	}
-
-	s.previous = true
-	_, err = s.out.Write(bytes.TrimSpace(buffer))
-	return err
-}
-
-func (s *JSONStream) Close() error {
-	_, err := s.out.Write([]byte("\n]"))
-	return err
 }

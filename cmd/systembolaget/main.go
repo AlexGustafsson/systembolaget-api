@@ -55,12 +55,6 @@ func main() {
 						Aliases: []string{"k"},
 						Usage:   "API key to use. Defaults to automatically fetching one",
 					},
-					&cli.StringFlag{
-						Name:      "output",
-						Aliases:   []string{"o"},
-						Usage:     "Path to output",
-						TakesFile: true,
-					},
 					&cli.DurationFlag{
 						Name:  "page-delay",
 						Usage: "Delay between pages",
@@ -214,12 +208,6 @@ func main() {
 						Name:    "api-key",
 						Aliases: []string{"k"},
 						Usage:   "API key to use. Defaults to automatically fetching one",
-					},
-					&cli.StringFlag{
-						Name:      "output",
-						Aliases:   []string{"o"},
-						Usage:     "Path to output",
-						TakesFile: true,
 					},
 					&cli.StringFlag{
 						Name:    "search",
