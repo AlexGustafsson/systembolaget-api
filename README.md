@@ -138,19 +138,21 @@ Any help with the project is more than welcome.
 
 ### Building
 
+The CLI is easily built using Docker.
+
 ```shell
-# Build
-make
+# Build for Linux using the amd64 architecture
+make linux/amd64
 
-# Format code
-make format
+# Run the built output
+./target/linux/amd64/systembolaget
+```
 
-# Lint code
-make lint
+The docker container can also be built to run directly on your system.
 
-# Vet the code
-make vet
+```shell
+docker build -t systembolaget .
 
-# Run tests
-make test
+# Run the container
+docker run --rm -it systembolaget
 ```

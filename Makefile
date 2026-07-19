@@ -1,32 +1,22 @@
-.PHONY: build format lint vet test package
+PLATFORMS := darwin/arm64 windows/amd64 linux/amd64 linux/arm64
 
-build:
-	go build -o build/systembolaget cmd/*.go
+ZIPS := $(foreach p,$(PLATFORMS),target/$(subst /,_,$(p)).zip)
 
-format:
-	go fmt ./...
+.PHONY: all package clean $(PLATFORMS)
 
-lint:
-	go run honnef.co/go/tools/cmd/staticcheck@2026.1 ./...
+all: $(PLATFORMS) $(ZIPS)
 
-vet:
-	go vet ./...
+$(PLATFORMS):
+	docker build --platform $@ --target export --output target/$@ .
 
-test:
-	go test -v ./...
+package: $(ZIPS)
 
-package:
-	GOOS=linux GOARCH=arm64 go build -o build/linux_arm64 cmd/*.go
-	tar -czf build/linux_arm64.tgz build/linux_arm64
+define ZIP_template
+target/$(subst /,_,$1).zip: target/$1/systembolaget
+	cd target/$1 && zip -q ../../$(subst /,_,$1).zip systembolaget
+endef
 
-	GOOS=linux GOARCH=amd64 go build -o build/linux_amd64 cmd/*.go
-	tar -czf build/linux_amd64.tgz build/linux_amd64
+$(foreach p,$(PLATFORMS),$(eval $(call ZIP_template,$(p))))
 
-	GOOS=darwin GOARCH=arm64 go build -o build/darwin_arm64 cmd/*.go
-	zip build/darwin_arm64.zip build/darwin_arm64
-
-	GOOS=darwin GOARCH=amd64 go build -o build/darwin_amd64 cmd/*.go
-	zip build/darwin_amd64.zip build/darwin_amd64
-
-	GOOS=windows GOARCH=amd64 go build -o build/windows_amd64 cmd/*.go
-	zip build/windows_amd64.zip build/windows_amd64
+clean:
+	rm -rf target 2>/dev/null || true
