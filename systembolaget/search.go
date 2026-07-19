@@ -2,9 +2,9 @@ package systembolaget
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -44,6 +44,112 @@ type SearchResult struct {
 // change often, which would lead this API to break.
 type Product map[string]any
 
+func (p Product) getNonEmptyString(key string) (string, bool) {
+	v, ok := p[key].(string)
+	if !ok || v == "" {
+		return "", false
+	}
+
+	return v, true
+}
+
+func (p Product) getNonEmptyFloat64(key string) (float64, bool) {
+	v, ok := p[key].(float64)
+	if !ok || v == 0 {
+		return 0, false
+	}
+
+	return v, true
+}
+
+// ID returns the product's product id.
+func (p Product) ID() (string, bool) {
+	return p.getNonEmptyString("productId")
+}
+
+// Category returns a text describing the product's category.
+func (p Product) Category() (string, bool) {
+	return p.getNonEmptyString("customCategoryTitle")
+}
+
+// Usage returns a text describing usage of the product (e.g. serving
+// temperature and food pairings).
+func (p Product) Usage() (string, bool) {
+	return p.getNonEmptyString("usage")
+}
+
+// Country of origin.
+func (p Product) Country() (string, bool) {
+	return p.getNonEmptyString("country")
+}
+
+// Volume (milliliters).
+func (p Product) Volume() (float64, bool) {
+	return p.getNonEmptyFloat64("volume")
+}
+
+// VolumeText returns a human-readable text describing the product's volume.
+func (p Product) VolumeText() (string, bool) {
+	return p.getNonEmptyString("volumeText")
+}
+
+// Price (SEK).
+func (p Product) Price() (float64, bool) {
+	return p.getNonEmptyFloat64("price")
+}
+
+// Thumbnail returns a byte slice typically containing a WebP image.
+func (p Product) Thumbnail() ([]byte, bool) {
+	imageModules, ok := p["imageModules"].(map[string]any)
+	if !ok || imageModules == nil {
+		return nil, false
+	}
+
+	thumbnail, ok := imageModules["thumbnail"].(string)
+	if !ok || thumbnail == "" {
+		return nil, false
+	}
+
+	data, err := base64.StdEncoding.DecodeString(thumbnail)
+	if err != nil {
+		return nil, false
+	}
+
+	return data, true
+}
+
+type ProductImage struct {
+	URL string
+	// Ignored fields:
+	// FileType string `json:"fileType"` // Typically png, but rather unimportant?
+	// Size ?? `json:"size"` // Always null?
+}
+
+// Images returns references to images of the product.
+func (p Product) Images() ([]ProductImage, bool) {
+	images, ok := p["images"].([]any)
+	if !ok || images == nil {
+		return nil, false
+	}
+
+	result := make([]ProductImage, 0)
+	for _, image := range images {
+		i, ok := image.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+
+		imageUrl, ok := i["imageUrl"].(string)
+		if !ok || imageUrl == "" {
+			continue
+		}
+
+		result = append(result, ProductImage{URL: imageUrl})
+	}
+
+	return result, true
+}
+
 // Filter is returned in a search result and describes how to further narrow
 // the search.
 type Filter struct {
@@ -72,7 +178,7 @@ type SearchModifier struct {
 
 // SearchCursor allows to easily loop through the results of a query.
 type SearchCursor struct {
-	client *Client
+	client *AuthenticatedClient
 
 	options     SearchOptions
 	filters     []SearchFilter
@@ -88,8 +194,6 @@ type SearchCursor struct {
 func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration) bool {
 	c.index++
 
-	log := GetLogger(ctx).With(slog.Duration("delayBetweenPages", delayBetweenPages))
-
 	// There's at least one product left on the current page
 	if c.currentPage != nil && c.index < len(c.currentPage.Products) {
 		c.currentError = nil
@@ -98,7 +202,6 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 
 	// There are no more pages
 	if !c.hasNextPage() {
-		log.Debug("No more pages")
 		c.index = -1
 		c.currentError = nil
 		return false
@@ -107,7 +210,6 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 	// Move on to the next page after waiting for the specified amount of time
 	// The first page is fetched immediately
 	if c.currentPage != nil {
-		log.Debug("Waiting")
 		select {
 		case <-time.After(delayBetweenPages):
 		case <-ctx.Done():
@@ -115,7 +217,7 @@ func (c *SearchCursor) Next(ctx context.Context, delayBetweenPages time.Duration
 			return false
 		}
 	}
-	c.currentError = c.nextPage(ctx, log)
+	c.currentError = c.nextPage(ctx)
 	if c.currentError != nil {
 		return false
 	}
@@ -131,13 +233,11 @@ func (c *SearchCursor) hasNextPage() bool {
 }
 
 // nextPage fetches the next page.
-func (c *SearchCursor) nextPage(ctx context.Context, log *slog.Logger) error {
+func (c *SearchCursor) nextPage(ctx context.Context) error {
 	c.options.Page++
 	c.index = 0
 
-	log = log.With(slog.Int("index", c.index))
-
-	nextPage, err := c.client.Search(SetLogger(ctx, log), &c.options, c.filters...)
+	nextPage, err := c.client.Search(ctx, &c.options, c.filters...)
 	if err != nil {
 		return err
 	}
@@ -370,9 +470,7 @@ func FilterByCategory(category string, subcategory string, subsubcategory string
 }
 
 // Search searches for products.
-func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...SearchFilter) (*SearchResult, error) {
-	log := GetLogger(ctx)
-
+func (c *AuthenticatedClient) Search(ctx context.Context, options *SearchOptions, filters ...SearchFilter) (*SearchResult, error) {
 	if options.PageSize == 0 {
 		options.PageSize = 30
 	}
@@ -403,18 +501,16 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 		RawQuery: query.Encode(),
 	}
 
-	log = log.With(slog.String("url", u.String()))
-
 	header := http.Header{}
 	header.Set("Origin", "https://www.systembolaget.se")
 	header.Set("Access-Control-Allow-Origin", "*")
 	header.Set("Pragma", "no-cache")
 	header.Set("Accept", "application/json")
 	header.Set("Cache-Control", "no-cache")
-	header.Set("Ocp-Apim-Subscription-Key", c.apiKey)
+	header.Set("Ocp-Apim-Subscription-Key", c.APIKey)
 
-	if c.userAgent != "" {
-		header.Set("User-Agent", c.userAgent)
+	if c.UserAgent != "" {
+		header.Set("User-Agent", c.UserAgent)
 	}
 
 	req := (&http.Request{
@@ -423,32 +519,28 @@ func (c *Client) Search(ctx context.Context, options *SearchOptions, filters ...
 		Header: header,
 	}).Clone(ctx)
 
-	log.Debug("Performing request")
-	res, err := c.httpClient.Do(req)
+	res, err := c.Client.Do(req)
 	if err != nil {
-		log.Error("Request failed", slog.Any("error", err))
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		log.Error("Got unexpected status code", slog.Int("statusCode", res.StatusCode), slog.String("status", res.Status))
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
 	var result SearchResult
 	decoder := json.NewDecoder(res.Body)
 	if err := decoder.Decode(&result); err != nil {
-		log.Error("Failed to decode body", slog.Any("error", err))
 		return nil, err
 	}
 
-	log.Debug("Got results", slog.Int("results", result.Metadata.DocumentCount), slog.Int("nextPage", result.Metadata.NextPage))
 	return &result, nil
 }
 
 // SearchWithCursor creates a SearchCursor to easily loop over any number of
 // results.
-func (c *Client) SearchWithCursor(options *SearchOptions, filters ...SearchFilter) *SearchCursor {
+func (c *AuthenticatedClient) SearchWithCursor(options *SearchOptions, filters ...SearchFilter) *SearchCursor {
 	if options == nil {
 		options = &SearchOptions{}
 	}

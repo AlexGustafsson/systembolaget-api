@@ -13,9 +13,7 @@ func TestSearchWithCursor(t *testing.T) {
 		t.Skip()
 	}
 
-	client := NewClient(apiKey)
-
-	cursor := client.SearchWithCursor(nil, FilterByCategory("Alkoholfritt", "Öl", ""))
+	cursor := testClient.SearchWithCursor(nil, FilterByCategory("Alkoholfritt", "Öl", ""))
 
 	yieldedItems := 0
 	for cursor.Next(context.TODO(), 0) {

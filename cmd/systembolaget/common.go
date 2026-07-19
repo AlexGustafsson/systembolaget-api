@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/alexgustafsson/systembolaget-api/v4/systembolaget"
@@ -18,16 +22,54 @@ func configureLogging(ctx *cli.Context) *slog.Logger {
 	}
 }
 
-func getAPIKey(ctx *cli.Context, log *slog.Logger) (string, error) {
+func getClient(ctx *cli.Context, log *slog.Logger) (*systembolaget.AuthenticatedClient, error) {
 	if apiKey := ctx.String("api-key"); apiKey != "" {
-		return apiKey, nil
+		return &systembolaget.AuthenticatedClient{
+			APIKey: apiKey,
+			Client: http.DefaultClient,
+		}, nil
 	}
 
 	log.Debug("Fetching API key")
-	apiKey, err := systembolaget.GetAPIKey(systembolaget.SetLogger(ctx.Context, log))
+	client, err := systembolaget.DefaultClient.GetAuthenticatedClient(ctx.Context)
 	if err != nil {
-		return "", fmt.Errorf("failed to get API key, please specify one")
+		return nil, fmt.Errorf("failed to get API key, please specify one: %w", err)
 	}
 
-	return apiKey, nil
+	return client, nil
+}
+
+type JSONStream struct {
+	out      io.Writer
+	previous bool
+}
+
+func NewJSONStream(out io.Writer) *JSONStream {
+	out.Write([]byte("[\n  "))
+	return &JSONStream{
+		out:      out,
+		previous: false,
+	}
+}
+
+func (s *JSONStream) Write(v any) error {
+	if s.previous {
+		if _, err := s.out.Write([]byte(",\n  ")); err != nil {
+			return err
+		}
+	}
+
+	buffer, err := json.MarshalIndent(v, "  ", "  ")
+	if err != nil {
+		return err
+	}
+
+	s.previous = true
+	_, err = s.out.Write(bytes.TrimSpace(buffer))
+	return err
+}
+
+func (s *JSONStream) Close() error {
+	_, err := s.out.Write([]byte("\n]"))
+	return err
 }

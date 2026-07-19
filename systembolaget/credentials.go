@@ -17,14 +17,14 @@ var chunkPathRegex = regexp.MustCompile(`src="(/_next/static/chunks/[^"]+\.js)"`
 
 // GetAPIKey returns the API credentials used by the Systembolaget
 // frontend.
-func GetAPIKey(ctx context.Context) (string, error) {
-	chunkPaths, err := getChunkPaths(ctx)
+func (c *Client) GetAPIKey(ctx context.Context) (string, error) {
+	chunkPaths, err := c.getChunkPaths(ctx)
 	if err != nil {
 		return "", err
 	}
 
 	for _, chunkPath := range chunkPaths {
-		key, err := extractAPIKey(ctx, chunkPath)
+		key, err := c.extractAPIKey(ctx, chunkPath)
 		if err == nil {
 			return key, nil
 		}
@@ -33,11 +33,28 @@ func GetAPIKey(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("unable to identify API token in any script chunk")
 }
 
-func getChunkPaths(ctx context.Context) ([]string, error) {
-	log := GetLogger(ctx)
+// GetAuthenticatedClient calls [Client.GetAPIKey] and returns an initialized
+// [AuthenticatedClient] using the key and defaults from the client.
+func (c *Client) GetAuthenticatedClient(ctx context.Context) (*AuthenticatedClient, error) {
+	apiKey, err := c.GetAPIKey(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	log.Debug("Fetching systembolaget.se")
-	res, err := http.DefaultClient.Get("https://www.systembolaget.se")
+	return &AuthenticatedClient{
+		APIKey:    apiKey,
+		Client:    c.Client,
+		UserAgent: c.UserAgent,
+	}, nil
+}
+
+func (c *Client) getChunkPaths(ctx context.Context) ([]string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://www.systembolaget.se", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.Client.Do(req)
 	if err != nil {
 		slog.Error("Request failed", slog.Any("error", err))
 		return nil, err
@@ -73,11 +90,13 @@ func getChunkPaths(ctx context.Context) ([]string, error) {
 	return paths, nil
 }
 
-func extractAPIKey(ctx context.Context, url string) (string, error) {
-	log := GetLogger(ctx)
+func (c *Client) extractAPIKey(ctx context.Context, url string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
 
-	log.Debug("Fetching chunk", slog.String("url", url))
-	res, err := http.DefaultClient.Get(url)
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return "", err
 	}

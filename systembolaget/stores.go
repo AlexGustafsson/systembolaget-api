@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -12,14 +11,12 @@ import (
 
 // Store represents a Systembolaget store.
 type Store struct {
-	SiteID        string `json:"siteId"`
-	Alias         string `json:"alias"`
-	StreetAddress string `json:"streetAddress"`
-	DisplayName   string `json:"displayName"`
-	City          string `json:"city"`
-	County        string `json:"county"`
-	// NOTE: always null, exclude for now
-	// PostalCode
+	SiteID            string              `json:"siteId"`
+	Alias             string              `json:"alias"`
+	StreetAddress     string              `json:"streetAddress"`
+	DisplayName       string              `json:"displayName"`
+	City              string              `json:"city"`
+	County            string              `json:"county"`
 	IsAgent           bool                `json:"isAgent"`
 	IsBlocked         bool                `json:"isBlocked"`
 	BlockedText       string              `json:"blockedText"`
@@ -28,6 +25,8 @@ type Store struct {
 	IsTastingStore    bool                `json:"isTastingStore"`
 	OpeningHours      []StoreOpeningHours `json:"openingHours"`
 	Position          *StorePosition      `json:"position"`
+	// Ignored fields:
+	// PostalCode string `json:"postalCode"` // Always null
 }
 
 type StoreOpeningHours struct {
@@ -42,16 +41,14 @@ type StorePosition struct {
 	Longitude float64 `json:"longitude"`
 }
 
-// Stores fetches available stores.
-func (c *Client) Stores(ctx context.Context) ([]Store, error) {
+// GetStore fetches all available stores.
+func (c *AuthenticatedClient) GetStores(ctx context.Context) ([]Store, error) {
 	return c.SearchStores(ctx, "", true)
 }
 
-// SearchStores searches for available stores.
+// SearchStores searches for available using a query.
 // Query typically matches both name and location.
-func (c *Client) SearchStores(ctx context.Context, query string, includePredictions bool) ([]Store, error) {
-	log := GetLogger(ctx)
-
+func (c *AuthenticatedClient) SearchStores(ctx context.Context, query string, includePredictions bool) ([]Store, error) {
 	queryParams := url.Values{}
 	queryParams.Set("includePredictions", strconv.FormatBool(includePredictions))
 	if query != "" {
@@ -65,18 +62,16 @@ func (c *Client) SearchStores(ctx context.Context, query string, includePredicti
 		RawQuery: queryParams.Encode(),
 	}
 
-	log = log.With(slog.String("url", u.String()))
-
 	header := http.Header{}
 	header.Set("Origin", "https://www.systembolaget.se")
 	header.Set("Access-Control-Allow-Origin", "*")
 	header.Set("Pragma", "no-cache")
 	header.Set("Accept", "application/json")
 	header.Set("Cache-Control", "no-cache")
-	header.Set("Ocp-Apim-Subscription-Key", c.apiKey)
+	header.Set("Ocp-Apim-Subscription-Key", c.APIKey)
 
-	if c.userAgent != "" {
-		header.Set("User-Agent", c.userAgent)
+	if c.UserAgent != "" {
+		header.Set("User-Agent", c.UserAgent)
 	}
 
 	req := (&http.Request{
@@ -85,15 +80,13 @@ func (c *Client) SearchStores(ctx context.Context, query string, includePredicti
 		Header: header,
 	}).Clone(ctx)
 
-	log.Debug("Performing request")
-	res, err := c.httpClient.Do(req)
+	res, err := c.Client.Do(req)
 	if err != nil {
-		log.Error("Request failed")
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		log.Error("Got unexpected status code", slog.Int("statusCode", res.StatusCode), slog.String("status", res.Status))
 		return nil, fmt.Errorf("unexpected status code: %d - %s", res.StatusCode, res.Status)
 	}
 
@@ -102,7 +95,6 @@ func (c *Client) SearchStores(ctx context.Context, query string, includePredicti
 	}
 	decoder := json.NewDecoder(res.Body)
 	if err := decoder.Decode(&result); err != nil {
-		log.Error("Failed to decode body", slog.Any("error", err))
 		return nil, err
 	}
 

@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"io"
 	"log/slog"
 	"os"
@@ -14,53 +12,16 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type JSONStream struct {
-	out      io.Writer
-	previous bool
-}
-
-func NewJSONStream(out io.Writer) *JSONStream {
-	out.Write([]byte("[\n  "))
-	return &JSONStream{
-		out:      out,
-		previous: false,
-	}
-}
-
-func (s *JSONStream) Write(v any) error {
-	if s.previous {
-		if _, err := s.out.Write([]byte(",\n  ")); err != nil {
-			return err
-		}
-	}
-
-	buffer, err := json.MarshalIndent(v, "  ", "  ")
-	if err != nil {
-		return err
-	}
-
-	s.previous = true
-	_, err = s.out.Write(bytes.TrimSpace(buffer))
-	return err
-}
-
-func (s *JSONStream) Close() error {
-	_, err := s.out.Write([]byte("\n]"))
-	return err
-}
-
 func ActionAssortment(ctx *cli.Context) error {
 	log := configureLogging(ctx)
 
-	apiKey, err := getAPIKey(ctx, log)
+	client, err := getClient(ctx, log)
 	if err != nil {
 		return err
 	}
 
 	delayBetweenPages := ctx.Duration("page-delay")
 	limit := ctx.Int("limit")
-
-	client := systembolaget.NewClient(apiKey)
 
 	options := &systembolaget.SearchOptions{}
 
@@ -208,7 +169,7 @@ func ActionAssortment(ctx *cli.Context) error {
 
 	log.Debug("Fetching results")
 	fetchedResults := 0
-	for cursor.Next(systembolaget.SetLogger(runCtx, log), delayBetweenPages) {
+	for cursor.Next(runCtx, delayBetweenPages) {
 		if err := out.Write(cursor.At()); err != nil {
 			log.Error("Failed to write result", slog.Any("error", err))
 			return err

@@ -8,19 +8,16 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/alexgustafsson/systembolaget-api/v4/systembolaget"
 	"github.com/urfave/cli/v2"
 )
 
 func ActionStores(ctx *cli.Context) error {
 	log := configureLogging(ctx)
 
-	apiKey, err := getAPIKey(ctx, log)
+	client, err := getClient(ctx, log)
 	if err != nil {
 		return err
 	}
-
-	client := systembolaget.NewClient(apiKey)
 
 	var output io.Writer
 	if ctx.String("output") == "" {
@@ -53,7 +50,7 @@ func ActionStores(ctx *cli.Context) error {
 		}
 	}()
 
-	stores, err := client.SearchStores(systembolaget.SetLogger(runCtx, log), ctx.String("search"), ctx.String("search") == "")
+	stores, err := client.SearchStores(runCtx, ctx.String("search"), ctx.String("search") == "")
 	if err != nil {
 		return err
 	}
