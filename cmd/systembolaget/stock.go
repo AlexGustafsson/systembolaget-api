@@ -11,12 +11,6 @@ import (
 )
 
 func ActionStock(ctx context.Context, cmd *cli.Command) error {
-	storeID := cmd.Args().Get(0)
-	productID := cmd.Args().Get(1)
-	if storeID == "" || productID == "" {
-		return cli.Exit("Missing store and/or product id", 1)
-	}
-
 	log := configureLogging(cmd)
 
 	client, err := getClient(ctx, cmd, log)
@@ -37,7 +31,7 @@ func ActionStock(ctx context.Context, cmd *cli.Command) error {
 		output = file
 	}
 
-	stores, err := client.GetStockStatus(ctx, storeID, productID)
+	stores, err := client.GetStockStatus(ctx, cmd.String("store-id"), cmd.String("product-id"))
 	if err != nil {
 		return err
 	}

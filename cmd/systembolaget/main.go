@@ -229,10 +229,19 @@ func main() {
 				},
 			},
 			{
-				Name:      "stock",
-				Usage:     "Get current stock",
-				Action:    ActionStock,
-				ArgsUsage: "<store id> <product id>",
+				Name:   "stock",
+				Usage:  "Get current stock",
+				Action: ActionStock,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "store-id",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "product-id",
+						Required: true,
+					},
+				},
 			},
 		},
 	}
