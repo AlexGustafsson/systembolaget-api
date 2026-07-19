@@ -2,26 +2,26 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"log/slog"
 	"os"
-	"os/signal"
 	"time"
 
 	"github.com/alexgustafsson/systembolaget-api/v4/systembolaget"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-func ActionAssortment(ctx *cli.Context) error {
-	log := configureLogging(ctx)
+func ActionAssortment(ctx context.Context, cmd *cli.Command) error {
+	log := configureLogging(cmd)
 
-	client, err := getClient(ctx, log)
+	client, err := getClient(ctx, cmd, log)
 	if err != nil {
 		return err
 	}
 
-	delayBetweenPages := ctx.Duration("page-delay")
-	limit := ctx.Int("limit")
+	delayBetweenPages := cmd.Duration("page-delay")
+	limit := cmd.Int("limit")
 
 	options := &systembolaget.SearchOptions{}
 
@@ -29,43 +29,43 @@ func ActionAssortment(ctx *cli.Context) error {
 		options.SortBy = systembolaget.SortProperty(property)
 	}
 
-	if ctx.String("sort") == "ascending" {
+	if cmd.String("sort") == "ascending" {
 		options.SortDirection = systembolaget.SortDirectionAscending
-	} else if ctx.String("sort") == "descending" {
+	} else if cmd.String("sort") == "descending" {
 		options.SortDirection = systembolaget.SortDirectionDescending
 	}
 
 	filters := []systembolaget.SearchFilter{}
 
-	if store := ctx.String("store"); store != "" {
+	if store := cmd.String("store"); store != "" {
 		filters = append(filters, systembolaget.FilterByStore(store))
 	}
 
-	if query := ctx.String("query"); query != "" {
+	if query := cmd.String("query"); query != "" {
 		filters = append(filters, systembolaget.FilterByQuery(query))
 	}
 
-	if r, ok := ctx.Value("taste-clock-body").(*Range[int]); ok && r != nil {
+	if r, ok := cmd.Value("taste-clock-body").(*Range[int]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterByTasteClockBody(r.Minimum, r.Maximum))
 	}
 
-	if r, ok := ctx.Value("taste-clock-bitterness").(*Range[int]); ok && r != nil {
+	if r, ok := cmd.Value("taste-clock-bitterness").(*Range[int]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterByTasteClockBitterness(r.Minimum, r.Maximum))
 	}
 
-	if r, ok := ctx.Value("taste-clock-sweetness").(*Range[int]); ok && r != nil {
+	if r, ok := cmd.Value("taste-clock-sweetness").(*Range[int]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterByTasteClockSweetness(r.Minimum, r.Maximum))
 	}
 
-	if r, ok := ctx.Value("taste-clock-smokiness").(*Range[int]); ok && r != nil {
+	if r, ok := cmd.Value("taste-clock-smokiness").(*Range[int]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterByTasteClockSmokiness(r.Minimum, r.Maximum))
 	}
 
-	for _, vintage := range ctx.IntSlice("vintage") {
+	for _, vintage := range cmd.IntSlice("vintage") {
 		filters = append(filters, systembolaget.FilterByVintage(vintage))
 	}
 
-	if r, ok := ctx.Value("product-launch").(*Range[string]); ok && r != nil {
+	if r, ok := cmd.Value("product-launch").(*Range[string]); ok && r != nil {
 		min, err := time.Parse("2006-01-02", r.Minimum)
 		if err != nil {
 			return err
@@ -77,50 +77,50 @@ func ActionAssortment(ctx *cli.Context) error {
 		filters = append(filters, systembolaget.FilterByProductLaunch(min, max))
 	}
 
-	if r, ok := ctx.Value("alcohol-percentage").(*Range[int]); ok && r != nil {
+	if r, ok := cmd.Value("alcohol-percentage").(*Range[int]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterByAlcoholPercentage(r.Minimum, r.Maximum))
 	}
 
-	if r, ok := ctx.Value("sugar-content").(*Range[float32]); ok && r != nil {
+	if r, ok := cmd.Value("sugar-content").(*Range[float32]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterBySugarContent(r.Minimum, r.Maximum))
 	}
 
-	for _, grapes := range ctx.StringSlice("grapes") {
+	for _, grapes := range cmd.StringSlice("grapes") {
 		filters = append(filters, systembolaget.FilterByGrapes(grapes))
 	}
 
-	for _, match := range ctx.StringSlice("match") {
+	for _, match := range cmd.StringSlice("match") {
 		filters = append(filters, systembolaget.FilterByMatch(match))
 	}
 
-	for _, assortment := range ctx.StringSlice("assortment") {
+	for _, assortment := range cmd.StringSlice("assortment") {
 		filters = append(filters, systembolaget.FilterByAssortment(assortment))
 	}
 
-	for _, seal := range ctx.StringSlice("seal") {
+	for _, seal := range cmd.StringSlice("seal") {
 		filters = append(filters, systembolaget.FilterBySeal(seal))
 	}
 
-	if r, ok := ctx.Value("volume").(*Range[int]); ok && r != nil {
+	if r, ok := cmd.Value("volume").(*Range[int]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterByVolume(r.Minimum, r.Maximum))
 	}
 
-	if category := ctx.String("packaging-category"); category != "" {
-		subcategory := ctx.String("packaging-subcategory")
+	if category := cmd.String("packaging-category"); category != "" {
+		subcategory := cmd.String("packaging-subcategory")
 		filters = append(filters, systembolaget.FilterByPackaging(category, subcategory))
 	}
 
-	if r, ok := ctx.Value("price").(*Range[int]); ok && r != nil {
+	if r, ok := cmd.Value("price").(*Range[int]); ok && r != nil {
 		filters = append(filters, systembolaget.FilterByPrice(r.Minimum, r.Maximum))
 	}
 
-	for _, origin := range ctx.StringSlice("origin") {
+	for _, origin := range cmd.StringSlice("origin") {
 		filters = append(filters, systembolaget.FilterByOrigin(origin))
 	}
 
-	if category := ctx.String("category"); category != "" {
-		subcategory := ctx.String("subcategory")
-		subsubcategories := ctx.StringSlice("subsubcategory")
+	if category := cmd.String("category"); category != "" {
+		subcategory := cmd.String("subcategory")
+		subsubcategories := cmd.StringSlice("subsubcategory")
 		if len(subsubcategories) == 0 {
 			filters = append(filters, systembolaget.FilterByCategory(category, subcategory, ""))
 		} else {
@@ -134,10 +134,10 @@ func ActionAssortment(ctx *cli.Context) error {
 	cursor := client.SearchWithCursor(options, filters...)
 
 	var output io.Writer
-	if ctx.String("output") == "" {
+	if cmd.String("output") == "" {
 		output = os.Stdout
 	} else {
-		file, err := os.OpenFile(ctx.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		file, err := os.OpenFile(cmd.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Error("Failed to open output file", slog.Any("error", err))
 			return err
@@ -146,30 +146,13 @@ func ActionAssortment(ctx *cli.Context) error {
 		output = file
 	}
 
-	runCtx, cancel := context.WithCancel(ctx.Context)
-
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
-	caught := 0
-	go func() {
-		for range signals {
-			caught++
-			if caught == 1 {
-				slog.Info("Caught signal, exiting gracefully")
-				cancel()
-			} else {
-				slog.Info("Caught signal, exiting now")
-				os.Exit(1)
-			}
-		}
-	}()
-
+	json.NewEncoder(output)
 	out := NewJSONStream(output)
 	defer out.Close()
 
 	log.Debug("Fetching results")
 	fetchedResults := 0
-	for cursor.Next(runCtx, delayBetweenPages) {
+	for cursor.Next(ctx, delayBetweenPages) {
 		if err := out.Write(cursor.At()); err != nil {
 			log.Error("Failed to write result", slog.Any("error", err))
 			return err

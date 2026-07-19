@@ -1,14 +1,15 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
+
+type RangeFlag[T any] = cli.FlagBase[*Range[T], struct{}, rangeValue[T]]
 
 type Range[T any] struct {
 	Minimum T
@@ -19,59 +20,34 @@ func (r *Range[T]) String() string {
 	return fmt.Sprintf("%v-%v", r.Minimum, r.Maximum)
 }
 
-type RangeFlag[T any] struct {
-	Name        string
-	Usage       string
-	Aliases     []string
-	Value       *Range[T]
-	DefaultText string
+type rangeValue[T any] struct {
+	destination **Range[T]
 }
 
-func (f *RangeFlag[T]) Apply(set *flag.FlagSet) error {
-	set.Var(f, f.Name, f.Usage)
-	return nil
+// Create implements [cli.ValueCreator].
+func (r rangeValue[T]) Create(val *Range[T], p **Range[T], c struct{}) cli.Value {
+	*p = val
+	return &rangeValue[T]{
+		destination: p,
+	}
 }
 
-func (f *RangeFlag[T]) Names() []string {
-	return cli.FlagNames(f.Name, f.Aliases)
+// ToString implements [cli.ValueCreator].
+func (r rangeValue[T]) ToString(val *Range[T]) string {
+	r.destination = &val
+	return r.String()
 }
 
-func (f *RangeFlag[T]) IsSet() bool {
-	return f.Value != nil
+// Get implements [cli.Value].
+func (r *rangeValue[T]) Get() any {
+	return *r.destination
 }
 
-func (f *RangeFlag[T]) TakesValue() bool {
-	return true
-}
-
-func (f *RangeFlag[T]) GetUsage() string {
-	return f.Usage
-}
-
-func (f *RangeFlag[T]) GetValue() string {
-	return f.Value.String()
-}
-
-func (f *RangeFlag[T]) GetDefaultText() string {
-	return f.DefaultText
-}
-
-func (f *RangeFlag[T]) GetEnvVars() []string {
-	return nil
-}
-
-func (f *RangeFlag[T]) String() string {
-	return cli.FlagStringer(f)
-}
-
-func (f *RangeFlag[T]) Get() any {
-	return f.Value
-}
-
-func (f *RangeFlag[T]) Set(value string) error {
-	minimumString, maximumString, ok := strings.Cut(value, ",")
+// Set implements [cli.Value].
+func (r *rangeValue[T]) Set(value string) error {
+	minimumString, maximumString, ok := strings.Cut(value, "-")
 	if !ok {
-		return fmt.Errorf("invalid range format, expected min,max")
+		return fmt.Errorf("invalid range format, expected min-max")
 	}
 
 	minimumValue := reflect.ValueOf(new(T))
@@ -94,23 +70,21 @@ func (f *RangeFlag[T]) Set(value string) error {
 
 		minimumValue.Elem().Set(reflect.ValueOf(int(minimum)))
 		maximumValue.Elem().Set(reflect.ValueOf(int(maximum)))
-	case reflect.Float32:
-		minimum, err := strconv.ParseFloat(minimumString, 32)
-		if err != nil {
-			return err
-		}
-
-		maximum, err := strconv.ParseFloat(maximumString, 32)
-		if err != nil {
-			return err
-		}
-
-		minimumValue.Elem().Set(reflect.ValueOf(float32(minimum)))
-		maximumValue.Elem().Set(reflect.ValueOf(float32(maximum)))
 	default:
-		return fmt.Errorf("unsupported range type")
+		panic("unsupported range type")
 	}
 
-	f.Value = &Range[T]{minimumValue.Elem().Interface().(T), maximumValue.Elem().Interface().(T)}
+	*r.destination = &Range[T]{
+		Minimum: minimumValue.Elem().Interface().(T),
+		Maximum: maximumValue.Elem().Interface().(T),
+	}
 	return nil
+}
+
+// String implements [cli.Value].
+func (r *rangeValue[T]) String() string {
+	if r.destination != nil && *r.destination != nil {
+		return (*r.destination).String()
+	}
+	return ""
 }

@@ -1,77 +1,61 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"strings"
+	"slices"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-type EnumValue struct {
-	Value   string
+type EnumConfig struct {
 	Choices []string
 }
 
-type EnumFlag struct {
-	Name        string
-	Usage       string
-	Aliases     []string
-	Value       EnumValue
-	DefaultText string
+type EnumFlag = cli.FlagBase[string, EnumConfig, enumValue]
+
+var _ cli.ValueCreator[string, EnumConfig] = (*enumValue)(nil)
+
+var _ cli.Value = (*enumValue)(nil)
+
+type enumValue struct {
+	destination *string
+	config      EnumConfig
 }
 
-func (f *EnumFlag) Apply(set *flag.FlagSet) error {
-	set.Var(&f.Value, f.Name, f.Usage)
-	return nil
-}
-
-func (f *EnumFlag) Names() []string {
-	return cli.FlagNames(f.Name, f.Aliases)
-}
-
-func (f *EnumFlag) IsSet() bool {
-	return f.Value.Value != ""
-}
-
-func (f *EnumFlag) TakesValue() bool {
-	return true
-}
-
-func (f *EnumFlag) GetUsage() string {
-	return f.Usage
-}
-
-func (f *EnumFlag) GetValue() string {
-	return f.Value.Value
-}
-
-func (f *EnumFlag) GetDefaultText() string {
-	return f.DefaultText
-}
-
-func (f *EnumFlag) GetEnvVars() []string {
-	return nil
-}
-
-func (f *EnumFlag) String() string {
-	return cli.FlagStringer(f) + fmt.Sprintf(" (one of: %s)", strings.Join(f.Value.Choices, ", "))
-}
-
-func (v *EnumValue) Get() any {
-	return v.Value
-}
-
-func (v *EnumValue) String() string {
-	return v.Value
-}
-
-func (v *EnumValue) Set(value string) error {
-	for _, x := range v.Choices {
-		if x == value {
-			v.Value = value
-			return nil
-		}
+// Create implements [cli.ValueCreator].
+func (e enumValue) Create(val string, p *string, c EnumConfig) cli.Value {
+	*p = val
+	return &enumValue{
+		destination: p,
+		config:      c,
 	}
-	return fmt.Errorf("not one of %s", strings.Join(v.Choices, ", "))
+}
+
+// ToString implements [cli.ValueCreator].
+func (e enumValue) ToString(val string) string {
+	e.destination = &val
+	return e.String()
+}
+
+// Get implements [cli.Value].
+func (e *enumValue) Get() any {
+	return *e.destination
+}
+
+// Set implements [cli.Value].
+func (e *enumValue) Set(val string) error {
+	if !slices.Contains(e.config.Choices, val) {
+		return fmt.Errorf("invalid choice")
+	}
+
+	*e.destination = val
+	return nil
+}
+
+// String implements [cli.Value].
+func (e *enumValue) String() string {
+	if e.destination != nil && *e.destination != "" {
+		return fmt.Sprintf("%q", *e.destination)
+	}
+	return ""
 }

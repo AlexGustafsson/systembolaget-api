@@ -6,24 +6,23 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"os/signal"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-func ActionStores(ctx *cli.Context) error {
-	log := configureLogging(ctx)
+func ActionStores(ctx context.Context, cmd *cli.Command) error {
+	log := configureLogging(cmd)
 
-	client, err := getClient(ctx, log)
+	client, err := getClient(ctx, cmd, log)
 	if err != nil {
 		return err
 	}
 
 	var output io.Writer
-	if ctx.String("output") == "" {
+	if cmd.String("output") == "" {
 		output = os.Stdout
 	} else {
-		file, err := os.OpenFile(ctx.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		file, err := os.OpenFile(cmd.String("output"), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Error("Failed to open output file", slog.Any("error", err))
 			return err
@@ -32,25 +31,7 @@ func ActionStores(ctx *cli.Context) error {
 		output = file
 	}
 
-	runCtx, cancel := context.WithCancel(ctx.Context)
-
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
-	caught := 0
-	go func() {
-		for range signals {
-			caught++
-			if caught == 1 {
-				slog.Info("Caught signal, exiting gracefully")
-				cancel()
-			} else {
-				slog.Info("Caught signal, exiting now")
-				os.Exit(1)
-			}
-		}
-	}()
-
-	stores, err := client.SearchStores(runCtx, ctx.String("search"), ctx.String("search") == "")
+	stores, err := client.SearchStores(ctx, cmd.String("search"), cmd.String("search") == "")
 	if err != nil {
 		return err
 	}

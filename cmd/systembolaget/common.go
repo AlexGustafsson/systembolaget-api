@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,11 +11,11 @@ import (
 	"os"
 
 	"github.com/alexgustafsson/systembolaget-api/v4/systembolaget"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-func configureLogging(ctx *cli.Context) *slog.Logger {
-	verbose := ctx.Bool("verbose")
+func configureLogging(cmd *cli.Command) *slog.Logger {
+	verbose := cmd.Bool("verbose")
 	if verbose {
 		return slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	} else {
@@ -22,8 +23,8 @@ func configureLogging(ctx *cli.Context) *slog.Logger {
 	}
 }
 
-func getClient(ctx *cli.Context, log *slog.Logger) (*systembolaget.AuthenticatedClient, error) {
-	if apiKey := ctx.String("api-key"); apiKey != "" {
+func getClient(ctx context.Context, cmd *cli.Command, log *slog.Logger) (*systembolaget.AuthenticatedClient, error) {
+	if apiKey := cmd.String("api-key"); apiKey != "" {
 		return &systembolaget.AuthenticatedClient{
 			APIKey: apiKey,
 			Client: http.DefaultClient,
@@ -31,7 +32,7 @@ func getClient(ctx *cli.Context, log *slog.Logger) (*systembolaget.Authenticated
 	}
 
 	log.Debug("Fetching API key")
-	client, err := systembolaget.DefaultClient.GetAuthenticatedClient(ctx.Context)
+	client, err := systembolaget.DefaultClient.GetAuthenticatedClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API key, please specify one: %w", err)
 	}
