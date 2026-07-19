@@ -13,7 +13,8 @@ can find
 
 ### Using as a utility
 
-Start by grabbing the latest release for your platform from the releases.
+Start by grabbing the latest release for your platform from the releases or use
+Docker.
 
 Search for beers produced in Sweden that were recently put up for sale.
 
