@@ -64,16 +64,8 @@ func ActionAssortment(ctx context.Context, cmd *cli.Command) error {
 		filters = append(filters, systembolaget.FilterByVintage(vintage))
 	}
 
-	if r, ok := cmd.Value("product-launch").(*Range[string]); ok && r != nil {
-		min, err := time.Parse("2006-01-02", r.Minimum)
-		if err != nil {
-			return err
-		}
-		max, err := time.Parse("2006-01-02", r.Maximum)
-		if err != nil {
-			return err
-		}
-		filters = append(filters, systembolaget.FilterByProductLaunch(min, max))
+	if r, ok := cmd.Value("product-launch").(*Range[time.Time]); ok && r != nil {
+		filters = append(filters, systembolaget.FilterByProductLaunch(r.Minimum, r.Maximum))
 	}
 
 	if r, ok := cmd.Value("alcohol-percentage").(*Range[int]); ok && r != nil {

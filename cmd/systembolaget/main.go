@@ -103,25 +103,25 @@ func main() {
 						Usage: "Query products using free text",
 					},
 					// FilterByTasteClockBody
-					&RangeFlag[int]{
+					&IntRangeFlag{
 						Name:        "taste-clock-body",
 						Usage:       "Filters products of a certain body where 0 (minimum) is a thin body and 12 (maximum) is a full body",
 						HideDefault: true,
 					},
 					// FilterByTasteClockBitterness
-					&RangeFlag[int]{
+					&IntRangeFlag{
 						Name:        "taste-clock-bitterness",
 						Usage:       "Filter products of a certain bitterness where 0 (minimum) is not bitter at all and 12 (maximum) is very bitter",
 						HideDefault: true,
 					},
 					// FilterByTasteClockSweetness
-					&RangeFlag[int]{
+					&IntRangeFlag{
 						Name:        "taste-clock-sweetness",
 						Usage:       "Filter products of a certain sweetness where 0 (minimum) is not sweet at all and 12 (maximum) is very sweet",
 						HideDefault: true,
 					},
 					// FilterByTasteClockSmokiness
-					&RangeFlag[int]{
+					&IntRangeFlag{
 						Name:        "taste-clock-smokiness",
 						Usage:       "Filter products of a certain smokiness where 0 (minimum) is not smoky at all and 12 (maximum) is very smoky",
 						HideDefault: true,
@@ -131,17 +131,17 @@ func main() {
 						Name: "vintage",
 					},
 					// FilterByProductLaunch
-					&RangeFlag[string]{
+					&DateRangeFlag{
 						Name:        "product-launch",
 						HideDefault: true,
 					},
 					// FilterByAlcoholPercentage
-					&RangeFlag[int]{
+					&IntRangeFlag{
 						Name:        "alcohol-percentage",
 						HideDefault: true,
 					},
 					// FilterBySugarContent
-					&RangeFlag[int]{
+					&FloatRangeFlag{
 						Name:        "sugar-content",
 						HideDefault: true,
 					},
@@ -165,7 +165,7 @@ func main() {
 						Usage: "Seal the product should use, such as 'A-koppling' or 'Champagnekork-natur'",
 					},
 					// FilterByVolume
-					&RangeFlag[int]{
+					&IntRangeFlag{
 						Name:        "volume",
 						HideDefault: true,
 					},
@@ -179,7 +179,7 @@ func main() {
 						Usage: "Filter products that use a specific packaging, such as 'Glasflaska'",
 					},
 					// FilterByPrice
-					&RangeFlag[int]{
+					&IntRangeFlag{
 						Name:        "price",
 						HideDefault: true,
 					},
