@@ -6,8 +6,8 @@ The utility is an easy to use way of fetching Systembolaget's open and closed
 APIs. It's written in Go and is available via several cross-platform builds.
 
 It's usable both as a library in Go and as a standalone utility for which you
-can find release builds
-[here](https://github.com/AlexGustafsson/systembolaget-api-fetch/releases/).
+can find
+[release builds here](https://github.com/AlexGustafsson/systembolaget-api/releases/).
 
 ## Quickstart
 
