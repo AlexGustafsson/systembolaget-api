@@ -471,6 +471,10 @@ func FilterByCategory(category string, subcategory string, subsubcategory string
 
 // Search searches for products.
 func (c *AuthenticatedClient) Search(ctx context.Context, options *SearchOptions, filters ...SearchFilter) (*SearchResult, error) {
+	if options == nil {
+		options = &SearchOptions{}
+	}
+
 	if options.PageSize == 0 {
 		options.PageSize = 30
 	}
