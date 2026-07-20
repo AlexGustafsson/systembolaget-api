@@ -165,7 +165,28 @@ func (p Product) Images() ([]ProductImage, bool) {
 			continue
 		}
 
-		result = append(result, ProductImage{URL: imageUrl})
+		// NOTE: The direct CDN URLs seem to not work, use the same proxy as the
+		// frontend.
+		// The frontend uses an image set with the following widths (always q=75):
+		// - 384
+		// - 768
+		// - 1024
+		// - 1208
+		// - 2000
+		// and the src set as 2000w, mirror that
+		query := make(url.Values)
+		query.Set("url", imageUrl+"_100.webp")
+		query.Set("w", "2000")
+		query.Set("q", "75")
+
+		u := url.URL{
+			Scheme:   "https",
+			Host:     "www.systembolaget.se",
+			Path:     "/_next/image/",
+			RawQuery: query.Encode(),
+		}
+
+		result = append(result, ProductImage{URL: u.String()})
 	}
 
 	return result, true
