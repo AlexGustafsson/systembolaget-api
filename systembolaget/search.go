@@ -67,9 +67,26 @@ func (p Product) ID() (string, bool) {
 	return p.getNonEmptyString("productId")
 }
 
+// Number returns the product's article number, typically used in stores for
+// quick lookup.
+func (p Product) Number() (string, bool) {
+	return p.getNonEmptyString("productNumber")
+}
+
 // Category returns a text describing the product's category.
 func (p Product) Category() (string, bool) {
 	return p.getNonEmptyString("customCategoryTitle")
+}
+
+// Title returns a text describing the product's main name (product name bold).
+func (p Product) Title() (string, bool) {
+	return p.getNonEmptyString("productNameBold")
+}
+
+// Subtitle returns a text describing the product's secondary name (product name
+// thin).
+func (p Product) Subtitle() (string, bool) {
+	return p.getNonEmptyString("productNameThin")
 }
 
 // Usage returns a text describing usage of the product (e.g. serving
@@ -96,6 +113,10 @@ func (p Product) VolumeText() (string, bool) {
 // Price (SEK).
 func (p Product) Price() (float64, bool) {
 	return p.getNonEmptyFloat64("price")
+}
+
+func (p Product) AlcoholPercentage() (float64, bool) {
+	return p.getNonEmptyFloat64("alcoholPercentage")
 }
 
 // Thumbnail returns a byte slice typically containing a WebP image.
