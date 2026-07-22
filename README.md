@@ -31,7 +31,7 @@ systembolaget assortment --taste-clock-sweetness 5-12 --category Vin --subcatego
 Get the names of non-alcoholic beverages in glass bottles.
 
 ```shell
-systembolaget assortment --alcohol-percentage 0-0 --packaging-category Flaska --limit 5 | jq -cr '.productNameBold'
+systembolaget assortment --alcohol-percentage 0-0 --packaging-category "Lättare glasflaska" --limit 5 | jq -cr '.productNameBold'
 ```
 
 Download the full assortment.
