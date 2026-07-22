@@ -14,7 +14,7 @@ can find
 ### Using as a utility
 
 Start by grabbing the latest release for your platform from the releases or use
-Docker.
+Docker (`ghcr.io/alexgustafsson/systembolaget-api`).
 
 Search for beers produced in Sweden that were recently put up for sale.
 
