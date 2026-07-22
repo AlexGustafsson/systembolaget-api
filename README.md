@@ -25,13 +25,13 @@ systembolaget assortment --category "Öl" --origin "Sverige" --sort-by "ProductL
 Get the names of Sake with a sweetness of between 5 and 12.
 
 ```shell
-systembolaget assortment --taste-clock-sweetness 5-12 --category Vin --subcategory Sake | jq -cr '.[].productNameBold'
+systembolaget assortment --taste-clock-sweetness 5-12 --category Vin --subcategory Sake | jq -cr '.productNameBold'
 ```
 
 Get the names of non-alcoholic beverages in glass bottles.
 
 ```shell
-systembolaget assortment --alcohol-percentage 0-0 --packaging-category Flaska --limit 5 | jq -cr '.[].productNameBold'
+systembolaget assortment --alcohol-percentage 0-0 --packaging-category Flaska --limit 5 | jq -cr '.productNameBold'
 ```
 
 Download the full assortment.
