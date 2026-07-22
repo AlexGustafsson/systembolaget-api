@@ -117,6 +117,12 @@ res, _ := client.Search(
 fmt.Println(res.Products)
 ```
 
+### Using in Home Assistant
+
+![Screenshot of home assistant card](./hass-systembolaget-card/screenshot.png)
+
+See [hass-systembolaget-card](./hass-systembolaget-card/README.md)
+
 ## Table of contents
 
 [Quickstart](#quickstart)<br/>
