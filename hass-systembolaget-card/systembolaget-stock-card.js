@@ -201,7 +201,7 @@ systembolagetStockCard.innerHTML = `
       hr {
         border: 0;
         height: 1px;
-        background-color: #e8e8e8;
+        background-color: var(--ha-card-border-color,var(--divider-color,#e0e0e0));
         margin: 6px 0;
       }
 
